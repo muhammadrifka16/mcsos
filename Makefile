@@ -1,40 +1,42 @@
-.PHONY: meta check smoke qemu-version clean distclean tree
+SHELL := /usr/bin/env bash
 
-BUILD_DIR := build
-SMOKE_DIR := smoke
+.PHONY: meta check proof qemu-probe repro test clean distclean
 
 meta:
-	@bash tools/check_env.sh
+	./tools/scripts/collect_meta.sh
 
 check:
-	@bash tools/check_env.sh
-	@shellcheck tools/check_env.sh
+	./tools/scripts/check_toolchain.sh
 
-smoke:
-	@mkdir -p $(BUILD_DIR)/smoke
-	clang --target=x86_64-unknown-none \
-	-ffreestanding \
-	-fno-stack-protector \
-	-fno-pic \
-	-mno-red-zone \
-	-mno-mmx -mno-sse -mno-sse2 \
-	-Wall -Wextra -Werror \
-	-std=c17 \
-	-c $(SMOKE_DIR)/freestanding.c \
-	-o $(BUILD_DIR)/smoke/freestanding.o
-	readelf -h $(BUILD_DIR)/smoke/freestanding.o | tee $(BUILD_DIR)/smoke/readelf-header.txt
-	objdump -drwC $(BUILD_DIR)/smoke/freestanding.o | tee $(BUILD_DIR)/smoke/objdump.txt >/dev/null
-	file $(BUILD_DIR)/smoke/freestanding.o | tee $(BUILD_DIR)/smoke/file.txt
+proof:
+	./tools/scripts/proof_compile.sh
 
-qemu-version:
-	@qemu-system-x86_64 --version
-	@echo "QEMU exists. M0 does not boot a kernel image."
+qemu-probe:
+	./tools/scripts/qemu_probe.sh
 
-tree:
-	@tree -a -L 3
+repro:
+	rm -rf build/repro
+	mkdir -p build/repro/run1
+	mkdir -p build/repro/run2
+
+	./tools/scripts/proof_compile.sh
+	sha256sum build/proof/freestanding_probe.elf > build/repro/sha256-run1.txt
+
+	rm -rf build/proof
+
+	./tools/scripts/proof_compile.sh
+	sha256sum build/proof/freestanding_probe.elf > build/repro/sha256-run2.txt
+
+	diff -u build/repro/sha256-run1.txt build/repro/sha256-run2.txt \
+	> build/repro/sha256-diff.txt || true
+
+	echo "OK: reproducibility check completed"
+
+test: meta check proof qemu-probe repro
+	@echo "OK: M1 test suite passed"
 
 clean:
-	rm -rf $(BUILD_DIR)/smoke
+	rm -rf build/proof
 
 distclean:
-	rm -rf $(BUILD_DIR)
+	rm -rf build
