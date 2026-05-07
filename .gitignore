@@ -13,3 +13,5 @@ gcc-10.3.0/
 build_log.txt
 gcc-10.3.0.tar.gz.*
 make
+*.tar.bz2
+*.tar.xz
