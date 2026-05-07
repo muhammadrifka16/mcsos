@@ -3,7 +3,7 @@ set -euo pipefail
 
 LIMINE_DIR="third_party/limine"
 LIMINE_BRANCH="${LIMINE_BRANCH:-v11.x-binary}"
-LIMINE_URL="${LIMINE_URL:-https://github.com/LimineBootloader/Limine.git}"
+LIMINE_URL="${LIMINE_URL:-https://github.com/Limine-Bootloader/Limine.git}"
 
 mkdir -p third_party build/meta
 
