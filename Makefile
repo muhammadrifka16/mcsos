@@ -1,5 +1,4 @@
 .RECIPEPREFIX := >
-
 SHELL := /usr/bin/env bash
 
 BUILD_DIR := build
@@ -19,7 +18,7 @@ OBJDUMP := objdump
 READELF := readelf
 NM := nm
 
-all: build inspect
+all: build inspect image
 
 build: $(KERNEL)
 
@@ -64,7 +63,7 @@ SRC_C := $(shell find kernel -name '*.c' | LC_ALL=C sort)
 OBJ := $(patsubst %.c,$(BUILD_DIR)/normal/%.o,$(SRC_C))
 PANIC_OBJ := $(patsubst %.c,$(BUILD_DIR)/panic/%.o,$(SRC_C))
 
-.PHONY: all build panic inspect audit clean distclean
+.PHONY: all build panic inspect audit image clean distclean
 
 panic: $(PANIC_KERNEL)
 
@@ -101,6 +100,22 @@ audit: inspect panic
 >grep -q 'kernel_panic_at' $(BUILD_DIR)/kernel.disasm.txt
 >$(READELF) -S $(KERNEL) | grep -q '.text'
 >$(READELF) -S $(KERNEL) | grep -q '.rodata'
+
+image: $(KERNEL)
+>cp $(KERNEL) iso_root/boot/kernel.elf
+
+>xorriso -as mkisofs \
+>-b boot/limine/limine-bios-cd.bin \
+>-no-emul-boot \
+>-boot-load-size 4 \
+>-boot-info-table \
+>--efi-boot boot/limine/limine-uefi-cd.bin \
+>-efi-boot-part \
+>--efi-boot-image \
+>--protective-msdos-label \
+>iso_root -o $(BUILD_DIR)/mcsos.iso
+
+>@echo "PASS: build/mcsos.iso dibuat"
 
 clean:
 >rm -rf $(BUILD_DIR)

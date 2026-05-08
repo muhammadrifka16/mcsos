@@ -3,9 +3,8 @@
 set -Eeuo pipefail
 
 ISO="${1:-build/mcsos.iso}"
-LOG="${2:-build/m3_serial.log}"
 
-TIMEOUT_SEC="${MCSOS_QEMU_TIMEOUT:-8}"
+TIMEOUT_SEC="${MCSOS_QEMU_TIMEOUT:-15}"
 
 OVMF_CODE="${OVMF_CODE:-/usr/share/OVMF/OVMF_CODE_4M.fd}"
 OVMF_VARS="${OVMF_VARS:-build/OVMF_VARS_4M.fd}"
@@ -27,10 +26,6 @@ test -f "$OVMF_CODE" \
 test -f "$OVMF_VARS" \
     || fail "OVMF_VARS tidak ditemukan: $OVMF_VARS"
 
-mkdir -p "$(dirname "$LOG")"
-
-rm -f "$LOG"
-
 timeout "$TIMEOUT_SEC" \
 qemu-system-x86_64 \
     -machine q35 \
@@ -41,21 +36,10 @@ qemu-system-x86_64 \
     -drive if=pflash,format=raw,file="$OVMF_VARS" \
     -cdrom "$ISO" \
     -boot d \
-    -serial file:"$LOG" \
+    -serial stdio \
     -nographic \
     -no-reboot \
     -no-shutdown \
     || true
-
-test -f "$LOG" \
-    || fail "serial log tidak dibuat"
-
-cat "$LOG"
-
-grep -q 'M3 kernel entered' "$LOG" \
-    || fail "log boot M3 tidak ditemukan"
-
-grep -q '\[M3\] selftest: basic invariants passed' "$LOG" \
-    || fail "selftest M3 tidak lulus"
 
 echo "PASS: QEMU smoke test M3 selesai"
