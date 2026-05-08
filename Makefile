@@ -33,6 +33,7 @@ CFLAGS := --target=x86_64-unknown-none-elf -g \
 -Wall \
 -Wextra \
 -Werror \
+-Ikernel/include \
 -Ikernel/arch/x86_64/include
 
 LDFLAGS := -nostdlib \

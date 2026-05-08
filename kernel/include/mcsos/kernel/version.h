@@ -1,0 +1,8 @@
+#ifndef MCSOS_KERNEL_VERSION_H
+#define MCSOS_KERNEL_VERSION_H
+
+#define MCSOS_NAME "MCSOS"
+#define MCSOS_VERSION "260502"
+#define MCSOS_MILESTONE "M3"
+
+#endif
