@@ -2,14 +2,22 @@
 SHELL := /usr/bin/env bash
 
 BUILD_DIR := build
+
 KERNEL := $(BUILD_DIR)/kernel.elf
 BP_KERNEL := $(BUILD_DIR)/kernel.breakpoint.elf
 PANIC_KERNEL := $(BUILD_DIR)/kernel.panic.elf
+
 MAP := $(BUILD_DIR)/kernel.map
 BP_MAP := $(BUILD_DIR)/kernel.breakpoint.map
 PANIC_MAP := $(BUILD_DIR)/kernel.panic.map
+
 DISASM := $(BUILD_DIR)/kernel.disasm.txt
 SYMS := $(BUILD_DIR)/kernel.syms.txt
+
+ISO_DIR := $(BUILD_DIR)/iso
+ISO_FILE := $(BUILD_DIR)/mcsos.iso
+PANIC_ISO := $(BUILD_DIR)/mcsos-panic.iso
+
 CC := clang
 LD := ld.lld
 OBJDUMP := objdump
@@ -17,19 +25,30 @@ READELF := readelf
 NM := nm
 
 COMMON_CFLAGS := --target=x86_64-unknown-none-elf -std=c17 -ffreestanding -fno-builtin -fno-stack-protector -fno-stack-check -fno-pic -fno-pie -fno-lto -m64 -march=x86-64 -mabi=sysv -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -mcmodel=kernel -Wall -Wextra -Werror -Ikernel/arch/x86_64/include -Ikernel/include
+
 COMMON_ASFLAGS := --target=x86_64-unknown-none-elf -ffreestanding -fno-pic -fno-pie -m64 -mno-red-zone -Wall -Wextra -Werror -Ikernel/arch/x86_64/include -Ikernel/include
+
 CFLAGS := $(COMMON_CFLAGS)
 ASFLAGS := $(COMMON_ASFLAGS)
+
 BP_CFLAGS := $(COMMON_CFLAGS) -DMCSOS_M4_TRIGGER_BREAKPOINT=1
 PANIC_CFLAGS := $(COMMON_CFLAGS) -DMCSOS_M4_TRIGGER_PANIC=1
+
 LDFLAGS := -nostdlib -static -z max-page-size=0x1000 -T linker.ld
+
 SRC_C := $(shell find kernel -name '*.c' | LC_ALL=C sort)
 SRC_S := $(shell find kernel -name '*.S' | LC_ALL=C sort)
-OBJ := $(patsubst %.c,$(BUILD_DIR)/normal/%.o,$(SRC_C)) $(patsubst %.S,$(BUILD_DIR)/normal/%.o,$(SRC_S))
-BP_OBJ := $(patsubst %.c,$(BUILD_DIR)/breakpoint/%.o,$(SRC_C)) $(patsubst %.S,$(BUILD_DIR)/breakpoint/%.o,$(SRC_S))
-PANIC_OBJ := $(patsubst %.c,$(BUILD_DIR)/panic/%.o,$(SRC_C)) $(patsubst %.S,$(BUILD_DIR)/panic/%.o,$(SRC_S))
 
-.PHONY: all build breakpoint panic inspect audit clean distclean
+OBJ := $(patsubst %.c,$(BUILD_DIR)/normal/%.o,$(SRC_C)) \
+       $(patsubst %.S,$(BUILD_DIR)/normal/%.o,$(SRC_S))
+
+BP_OBJ := $(patsubst %.c,$(BUILD_DIR)/breakpoint/%.o,$(SRC_C)) \
+          $(patsubst %.S,$(BUILD_DIR)/breakpoint/%.o,$(SRC_S))
+
+PANIC_OBJ := $(patsubst %.c,$(BUILD_DIR)/panic/%.o,$(SRC_C)) \
+             $(patsubst %.S,$(BUILD_DIR)/panic/%.o,$(SRC_S))
+
+.PHONY: all build breakpoint panic inspect audit clean distclean iso run panic-iso run-panic
 
 all: build inspect
 
@@ -96,6 +115,32 @@ audit: inspect breakpoint panic
 >grep -q 'x86_64_exception_stubs' $(SYMS)
 >$(READELF) -S $(KERNEL) | grep -q '.text'
 >$(READELF) -S $(KERNEL) | grep -q '.rodata'
+
+iso: $(KERNEL)
+>mkdir -p $(ISO_DIR)/boot/grub
+>cp $(KERNEL) $(ISO_DIR)/boot/kernel.elf
+>cp iso/boot/grub/grub.cfg $(ISO_DIR)/boot/grub/grub.cfg
+>grub-mkrescue -o $(ISO_FILE) $(ISO_DIR)
+
+run: iso
+>qemu-system-x86_64 \
+>       -cdrom $(ISO_FILE) \
+>       -serial stdio \
+>       -no-reboot \
+>       -no-shutdown
+
+panic-iso: $(PANIC_KERNEL)
+>mkdir -p $(ISO_DIR)/boot/grub
+>cp $(PANIC_KERNEL) $(ISO_DIR)/boot/kernel.elf
+>cp iso/boot/grub/grub.cfg $(ISO_DIR)/boot/grub/grub.cfg
+>grub-mkrescue -o $(PANIC_ISO) $(ISO_DIR)
+
+run-panic: panic-iso
+>qemu-system-x86_64 \
+>       -cdrom $(PANIC_ISO) \
+>       -serial stdio \
+>       -no-reboot \
+>       -no-shutdown
 
 clean:
 >rm -rf $(BUILD_DIR)
