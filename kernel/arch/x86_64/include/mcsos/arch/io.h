@@ -31,16 +31,5 @@ static inline void io_wait(void) {
     );
 }
 
-static inline void cpu_cli(void) {
-    __asm__ volatile ("cli");
-}
-
-static inline void cpu_sti(void) {
-    __asm__ volatile ("sti");
-}
-
-static inline void cpu_hlt(void) {
-    __asm__ volatile ("hlt");
-}
 
 #endif

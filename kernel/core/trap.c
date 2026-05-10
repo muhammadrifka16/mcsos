@@ -1,5 +1,9 @@
 #include <stdint.h>
+
 #include <mcsos/arch/idt.h>
+#include <mcsos/arch/pic.h>
+#include <mcsos/arch/pit.h>
+
 #include <mcsos/kernel/log.h>
 #include <mcsos/kernel/panic.h>
 
@@ -44,6 +48,7 @@ static const char *trap_name(uint64_t vector) {
     if (vector < 32u) {
         return exception_names[vector];
     }
+
     return "external-or-user-defined-interrupt";
 }
 
@@ -64,11 +69,28 @@ static void log_trap_frame(const x86_64_trap_frame_t *frame) {
 }
 
 void x86_64_trap_dispatch(x86_64_trap_frame_t *frame) {
+    uint8_t irq;
+
     KERNEL_ASSERT(frame != (x86_64_trap_frame_t *)0);
+
     ++trap_count;
+
+    if (frame->vector >= 32u && frame->vector <= 47u) {
+
+        irq = (uint8_t)(frame->vector - 32u);
+
+        if (irq == 0u) {
+            timer_on_irq0();
+        }
+
+        pic_send_eoi(irq);
+
+        return;
+    }
 
     log_write("[M4] trap dispatch: ");
     log_writeln(trap_name(frame->vector));
+
     log_trap_frame(frame);
 
     if (frame->vector == 3u) {

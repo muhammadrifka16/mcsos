@@ -24,9 +24,42 @@ OBJDUMP := objdump
 READELF := readelf
 NM := nm
 
-COMMON_CFLAGS := --target=x86_64-unknown-none-elf -std=c17 -ffreestanding -fno-builtin -fno-stack-protector -fno-stack-check -fno-pic -fno-pie -fno-lto -m64 -march=x86-64 -mabi=sysv -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -mcmodel=kernel -Wall -Wextra -Werror -Ikernel/arch/x86_64/include -Ikernel/include
+COMMON_CFLAGS := \
+--target=x86_64-unknown-none-elf \
+-std=c17 \
+-ffreestanding \
+-fno-builtin \
+-fno-stack-protector \
+-fno-stack-check \
+-fno-pic \
+-fno-pie \
+-fno-lto \
+-m64 \
+-march=x86-64 \
+-mabi=sysv \
+-mno-red-zone \
+-mno-mmx \
+-mno-sse \
+-mno-sse2 \
+-mcmodel=kernel \
+-Wall \
+-Wextra \
+-Werror \
+-Ikernel/arch/x86_64/include \
+-Ikernel/include
 
-COMMON_ASFLAGS := --target=x86_64-unknown-none-elf -ffreestanding -fno-pic -fno-pie -m64 -mno-red-zone -Wall -Wextra -Werror -Ikernel/arch/x86_64/include -Ikernel/include
+COMMON_ASFLAGS := \
+--target=x86_64-unknown-none-elf \
+-ffreestanding \
+-fno-pic \
+-fno-pie \
+-m64 \
+-mno-red-zone \
+-Wall \
+-Wextra \
+-Werror \
+-Ikernel/arch/x86_64/include \
+-Ikernel/include
 
 CFLAGS := $(COMMON_CFLAGS)
 ASFLAGS := $(COMMON_ASFLAGS)
@@ -34,21 +67,40 @@ ASFLAGS := $(COMMON_ASFLAGS)
 BP_CFLAGS := $(COMMON_CFLAGS) -DMCSOS_M4_TRIGGER_BREAKPOINT=1
 PANIC_CFLAGS := $(COMMON_CFLAGS) -DMCSOS_M4_TRIGGER_PANIC=1
 
-LDFLAGS := -nostdlib -static -z max-page-size=0x1000 -T linker.ld
+LDFLAGS := \
+-nostdlib \
+-static \
+-z max-page-size=0x1000 \
+-T linker.ld
 
 SRC_C := $(shell find kernel -name '*.c' | LC_ALL=C sort)
 SRC_S := $(shell find kernel -name '*.S' | LC_ALL=C sort)
 
-OBJ := $(patsubst %.c,$(BUILD_DIR)/normal/%.o,$(SRC_C)) \
-       $(patsubst %.S,$(BUILD_DIR)/normal/%.o,$(SRC_S))
+OBJ := \
+$(patsubst %.c,$(BUILD_DIR)/normal/%.o,$(SRC_C)) \
+$(patsubst %.S,$(BUILD_DIR)/normal/%.o,$(SRC_S))
 
-BP_OBJ := $(patsubst %.c,$(BUILD_DIR)/breakpoint/%.o,$(SRC_C)) \
-          $(patsubst %.S,$(BUILD_DIR)/breakpoint/%.o,$(SRC_S))
+BP_OBJ := \
+$(patsubst %.c,$(BUILD_DIR)/breakpoint/%.o,$(SRC_C)) \
+$(patsubst %.S,$(BUILD_DIR)/breakpoint/%.o,$(SRC_S))
 
-PANIC_OBJ := $(patsubst %.c,$(BUILD_DIR)/panic/%.o,$(SRC_C)) \
-             $(patsubst %.S,$(BUILD_DIR)/panic/%.o,$(SRC_S))
+PANIC_OBJ := \
+$(patsubst %.c,$(BUILD_DIR)/panic/%.o,$(SRC_C)) \
+$(patsubst %.S,$(BUILD_DIR)/panic/%.o,$(SRC_S))
 
-.PHONY: all build breakpoint panic inspect audit clean distclean iso run panic-iso run-panic
+.PHONY: \
+all \
+build \
+breakpoint \
+panic \
+inspect \
+audit \
+iso \
+run \
+panic-iso \
+run-panic \
+clean \
+distclean
 
 all: build inspect
 
@@ -99,11 +151,14 @@ inspect: $(KERNEL)
 >$(READELF) -l $(KERNEL) > $(BUILD_DIR)/kernel.readelf.programs.txt
 >$(NM) -n $(KERNEL) > $(SYMS)
 >$(OBJDUMP) -d -Mintel $(KERNEL) > $(DISASM)
+
 >grep -q 'ELF64' $(BUILD_DIR)/kernel.readelf.header.txt
 >grep -q 'Machine:[[:space:]]*Advanced Micro Devices X86-64' $(BUILD_DIR)/kernel.readelf.header.txt
+
 >grep -q 'kmain' $(SYMS)
 >grep -q 'x86_64_idt_init' $(SYMS)
 >grep -q 'x86_64_trap_dispatch' $(SYMS)
+
 >grep -q 'iretq' $(DISASM)
 >grep -q 'lidt' $(DISASM)
 
@@ -111,8 +166,10 @@ audit: inspect breakpoint panic
 >! $(NM) -u $(KERNEL) | grep .
 >! $(NM) -u $(BP_KERNEL) | grep .
 >! $(NM) -u $(PANIC_KERNEL) | grep .
+
 >grep -q 'isr_stub_14' $(SYMS)
 >grep -q 'x86_64_exception_stubs' $(SYMS)
+
 >$(READELF) -S $(KERNEL) | grep -q '.text'
 >$(READELF) -S $(KERNEL) | grep -q '.rodata'
 
