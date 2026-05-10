@@ -4,46 +4,46 @@
 static uint8_t pic1_mask;
 static uint8_t pic2_mask;
 
-void pic_send_eoi(unsigned char irq)
+void pic_send_eoi(uint8_t irq)
 {
-    if (irq >= 8) {
+    if (irq >= 8u) {
         outb(PIC2_COMMAND, PIC_EOI);
     }
 
     outb(PIC1_COMMAND, PIC_EOI);
 }
 
-void pic_remap(int offset1, int offset2)
+void pic_remap(uint8_t master_offset, uint8_t slave_offset)
 {
     pic1_mask = inb(PIC1_DATA);
     pic2_mask = inb(PIC2_DATA);
 
     /* starts the initialization sequence */
-    outb(PIC1_COMMAND, 0x11);
+    outb(PIC1_COMMAND, 0x11u);
     io_wait();
 
-    outb(PIC2_COMMAND, 0x11);
+    outb(PIC2_COMMAND, 0x11u);
     io_wait();
 
     /* set vector offset */
-    outb(PIC1_DATA, offset1);
+    outb(PIC1_DATA, master_offset);
     io_wait();
 
-    outb(PIC2_DATA, offset2);
+    outb(PIC2_DATA, slave_offset);
     io_wait();
 
     /* setup cascading */
-    outb(PIC1_DATA, 4);
+    outb(PIC1_DATA, 4u);
     io_wait();
 
-    outb(PIC2_DATA, 2);
+    outb(PIC2_DATA, 2u);
     io_wait();
 
     /* environment info */
-    outb(PIC1_DATA, 0x01);
+    outb(PIC1_DATA, 0x01u);
     io_wait();
 
-    outb(PIC2_DATA, 0x01);
+    outb(PIC2_DATA, 0x01u);
     io_wait();
 
     /* restore masks */
@@ -53,8 +53,8 @@ void pic_remap(int offset1, int offset2)
 
 void pic_mask_all(void)
 {
-    outb(PIC1_DATA, 0xFF);
-    outb(PIC2_DATA, 0xFF);
+    outb(PIC1_DATA, 0xFFu);
+    outb(PIC2_DATA, 0xFFu);
 }
 
 void pic_unmask_irq(uint8_t irq)
@@ -62,13 +62,24 @@ void pic_unmask_irq(uint8_t irq)
     uint16_t port;
     uint8_t value;
 
-    if (irq < 8) {
+    if (irq < 8u) {
         port = PIC1_DATA;
     } else {
         port = PIC2_DATA;
-        irq -= 8;
+        irq -= 8u;
     }
 
-    value = inb(port) & ~(1 << irq);
+    value = (uint8_t)(inb(port) & (uint8_t)~(1u << irq));
+
     outb(port, value);
+}
+
+uint8_t pic_read_master_mask(void)
+{
+    return inb(PIC1_DATA);
+}
+
+uint8_t pic_read_slave_mask(void)
+{
+    return inb(PIC2_DATA);
 }

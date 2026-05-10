@@ -2,7 +2,7 @@
 
 #include <mcsos/arch/idt.h>
 #include <mcsos/arch/pic.h>
-#include <mcsos/arch/pit.h>
+#include "pit.h"
 
 #include <mcsos/kernel/log.h>
 #include <mcsos/kernel/panic.h>

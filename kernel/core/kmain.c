@@ -4,7 +4,8 @@
 #include <mcsos/arch/idt.h>
 #include <mcsos/arch/io.h>
 #include <mcsos/arch/pic.h>
-#include <mcsos/arch/pit.h>
+
+#include "pit.h"
 
 #include <mcsos/kernel/log.h>
 #include <mcsos/kernel/panic.h>
@@ -75,6 +76,7 @@ void kmain(void) {
     pic_unmask_irq(0);
 
     log_write("[MCSOS:M5] pic: remapped; mask master=");
+
     log_key_value_hex64(
         "master_mask",
         pic_read_master_mask()

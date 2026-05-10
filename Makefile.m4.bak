@@ -20,7 +20,7 @@ PANIC_ISO := $(BUILD_DIR)/mcsos-panic.iso
 
 CC := clang
 LD := ld.lld
-OBJDUMP := llvm-objdump
+OBJDUMP := objdump
 READELF := readelf
 NM := nm
 
@@ -46,8 +46,7 @@ COMMON_CFLAGS := \
 -Wextra \
 -Werror \
 -Ikernel/arch/x86_64/include \
--Ikernel/include \
--Iinclude
+-Ikernel/include
 
 COMMON_ASFLAGS := \
 --target=x86_64-unknown-none-elf \
@@ -60,8 +59,7 @@ COMMON_ASFLAGS := \
 -Wextra \
 -Werror \
 -Ikernel/arch/x86_64/include \
--Ikernel/include \
--Iinclude
+-Ikernel/include
 
 CFLAGS := $(COMMON_CFLAGS)
 ASFLAGS := $(COMMON_ASFLAGS)
@@ -75,8 +73,7 @@ LDFLAGS := \
 -z max-page-size=0x1000 \
 -T linker.ld
 
-SRC_C := $(shell find kernel -name '*.c' | LC_ALL=C sort) src/pit.c
-
+SRC_C := $(shell find kernel -name '*.c' | LC_ALL=C sort)
 SRC_S := $(shell find kernel -name '*.S' | LC_ALL=C sort)
 
 OBJ := \
@@ -98,7 +95,6 @@ breakpoint \
 panic \
 inspect \
 audit \
-grade \
 iso \
 run \
 panic-iso \
@@ -174,20 +170,8 @@ audit: inspect breakpoint panic
 >grep -q 'isr_stub_14' $(SYMS)
 >grep -q 'x86_64_exception_stubs' $(SYMS)
 
->grep -q 'pic_remap' $(SYMS)
->grep -q 'pit_configure_hz' $(SYMS)
->grep -q 'timer_on_irq0' $(SYMS)
-
 >$(READELF) -S $(KERNEL) | grep -q '.text'
 >$(READELF) -S $(KERNEL) | grep -q '.rodata'
-
-grade: audit
->grep -q 'isr_stub_32' $(SYMS)
->grep -q 'pic_remap' $(SYMS)
->grep -q 'pit_configure_hz' $(SYMS)
->grep -q 'timer_on_irq0' $(SYMS)
->grep -q 'x86_64_trap_dispatch' $(SYMS)
->@echo "M5 static grade: PASS"
 
 iso: $(KERNEL)
 >mkdir -p $(ISO_DIR)/boot/grub

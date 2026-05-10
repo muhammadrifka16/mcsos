@@ -14,12 +14,16 @@
 #define PIC_EOI      0x20
 
 /* IRQ vector offsets */
-#define PIC1_OFFSET  0x20
-#define PIC2_OFFSET  0x28
+#define PIC_MASTER_OFFSET 0x20u
+#define PIC_SLAVE_OFFSET  0x28u
 
-void pic_remap(int offset1, int offset2);
-void pic_send_eoi(unsigned char irq);
+void pic_remap(uint8_t master_offset, uint8_t slave_offset);
+void pic_send_eoi(uint8_t irq);
+
 void pic_mask_all(void);
 void pic_unmask_irq(uint8_t irq);
+
+uint8_t pic_read_master_mask(void);
+uint8_t pic_read_slave_mask(void);
 
 #endif
