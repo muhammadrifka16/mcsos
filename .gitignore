@@ -9,6 +9,7 @@ iso_root/
 *.map
 *.o
 *.d
+*.log
 
 *.tar.gz
 *.tar.gz.*
