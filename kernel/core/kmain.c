@@ -256,6 +256,9 @@ void kmain(void)
         "M7: VMM core initialized\n"
     );
 
+serial_write_string(
+    "M7 ready for QEMU smoke test\n"
+);
     serial_write_string(
         "[MCSOS:M5] sti: enabling interrupts\n"
     );
