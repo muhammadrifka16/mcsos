@@ -6,6 +6,10 @@ SECTIONS
 
     __kernel_start = .;
 
+    .multiboot2 : ALIGN(8) {
+        KEEP(*(.multiboot2))
+    }
+
     .text : ALIGN(4K) {
         *(.text .text.*)
     }

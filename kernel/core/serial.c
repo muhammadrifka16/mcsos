@@ -1,43 +1,66 @@
 #include <stdint.h>
-#include <stddef.h>
 
-#include <mcsos/arch/io.h>
+#define COM1 0x3F8
 
-#define COM1_PORT 0x3F8u
-
-static int serial_transmit_empty(void) {
-    return (inb((uint16_t)(COM1_PORT + 5u)) & 0x20u) != 0;
+static inline void outb(uint16_t port, uint8_t value)
+{
+    __asm__ volatile (
+        "outb %0, %1"
+        :
+        : "a"(value), "Nd"(port)
+    );
 }
 
-void serial_init(void) {
-    outb((uint16_t)(COM1_PORT + 1u), 0x00u);
-    outb((uint16_t)(COM1_PORT + 3u), 0x80u);
+static inline uint8_t inb(uint16_t port)
+{
+    uint8_t ret;
 
-    outb((uint16_t)(COM1_PORT + 0u), 0x03u);
-    outb((uint16_t)(COM1_PORT + 1u), 0x00u);
+    __asm__ volatile (
+        "inb %1, %0"
+        : "=a"(ret)
+        : "Nd"(port)
+    );
 
-    outb((uint16_t)(COM1_PORT + 3u), 0x03u);
-    outb((uint16_t)(COM1_PORT + 2u), 0xC7u);
-    outb((uint16_t)(COM1_PORT + 4u), 0x0Bu);
+    return ret;
 }
 
-void serial_putc(char c) {
-    if (c == '\n') {
-        serial_putc('\r');
-    }
+void serial_init(void)
+{
+    outb(COM1 + 1, 0x00);
 
-    while (!serial_transmit_empty()) {
-    }
+    outb(COM1 + 3, 0x80);
 
-    outb((uint16_t)COM1_PORT, (uint8_t)c);
+    outb(COM1 + 0, 0x03);
+    outb(COM1 + 1, 0x00);
+
+    outb(COM1 + 3, 0x03);
+
+    outb(COM1 + 2, 0xC7);
+
+    outb(COM1 + 4, 0x0B);
 }
 
-void serial_write(const char *s) {
-    if (s == (const char *)0) {
-        return;
+static int serial_transmit_ready(void)
+{
+    return inb(COM1 + 5) & 0x20;
+}
+
+void serial_write_char(char c)
+{
+    while (!serial_transmit_ready()) {
     }
 
-    while (*s != '\0') {
-        serial_putc(*s++);
+    outb(COM1, (uint8_t)c);
+}
+
+void serial_write_string(const char *s)
+{
+    while (*s) {
+        serial_write_char(*s++);
     }
+}
+
+void serial_write(const char *s)
+{
+    serial_write_string(s);
 }

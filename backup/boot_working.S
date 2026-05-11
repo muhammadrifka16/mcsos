@@ -1,4 +1,4 @@
-.text
+.section .text
 .global _start
 .type _start, @function
 
@@ -8,10 +8,12 @@
 _start:
     cli
 
-    movw $0x0F42, 0xB8000
-
-    leaq __stack_top(%rip), %rsp
+    movq $__stack_top, %rsp
     andq $-16, %rsp
+
+    movb $'X', %al
+    movw $0xE9, %dx
+    outb %al, %dx
 
     call kmain
 

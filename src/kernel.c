@@ -1,37 +1,13 @@
-#include "idt.h"
-#include "io.h"
-#include "panic.h"
-#include "pic.h"
-#include "pit.h"
-#include "serial.h"
+#include <stdint.h>
 
-void kmain(void) {
-    cpu_cli();
-    serial_init();
-    serial_write_string("[MCSOS:M5] boot: external interrupt bring-up start\n");
+void kmain(void)
+{
+    volatile uint16_t *vga = (volatile uint16_t *)0xB8000;
 
-    idt_init();
-    serial_write_string("[MCSOS:M5] idt: loaded\n");
-
-    pic_remap(PIC_MASTER_OFFSET, PIC_SLAVE_OFFSET);
-    pic_mask_all();
-    pic_unmask_irq(0);
-    serial_write_string("[MCSOS:M5] pic: remapped; mask master=");
-    serial_write_hex64(pic_read_master_mask());
-    serial_write_string(" slave=");
-    serial_write_hex64(pic_read_slave_mask());
-    serial_write_string("\n");
-
-    pit_configure_hz(100u);
-    serial_write_string("[MCSOS:M5] pit: configured 100Hz\n");
-    serial_write_string("[MCSOS:M5] sti: enabling interrupts\n");
-    cpu_sti();
-
-#if defined(MCSOS_TEST_BREAKPOINT)
-    __asm__ volatile ("int3");
-#endif
+    vga[0] = 0x0F4D; // M
+    vga[1] = 0x0F35; // 5
 
     for (;;) {
-        cpu_hlt();
+        __asm__ volatile ("hlt");
     }
 }
