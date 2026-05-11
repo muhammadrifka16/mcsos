@@ -5,6 +5,8 @@
 #include "pit.h"
 #include "vmm.h"
 
+#include <stdint.h>
+
 #include <mcsos/arch/idt.h>
 #include <mcsos/kernel/panic.h>
 
@@ -26,20 +28,28 @@ static struct boot_mem_region test_regions[] = {
     { .base = 0x00500000ULL, .length = 0x00400000ULL, .type = BOOT_MEM_USABLE },
 };
 
-static void memzero(void *ptr, uint64_t size)
+static void memzero(
+    void *ptr,
+    uint64_t size
+)
 {
-    uint8_t *p = (uint8_t *)ptr;
+    uint8_t *p =
+        (uint8_t *)ptr;
 
     for (uint64_t i = 0; i < size; i++) {
         p[i] = 0;
     }
 }
 
-static uint64_t kernel_vmm_alloc(void *ctx)
+static uint64_t kernel_vmm_alloc(
+    void *ctx
+)
 {
     (void)ctx;
 
-    return pmm_alloc_frame(&kernel_pmm);
+    return pmm_alloc_frame(
+        &kernel_pmm
+    );
 }
 
 static void kernel_vmm_free(
@@ -54,7 +64,6 @@ static void kernel_vmm_free(
         frame_paddr
     );
 }
-
 
 static void *kernel_phys_to_virt(
     void *ctx,
@@ -89,15 +98,27 @@ static void kernel_memory_init(
         );
     }
 
-    serial_write_string("[m6] pmm initialized\n");
+    serial_write_string(
+        "[m6] pmm initialized\n"
+    );
 
-    uint64_t frame_count = pmm_frame_count(&kernel_pmm);
-    uint64_t free_count = pmm_free_count(&kernel_pmm);
+    uint64_t frame_count =
+        pmm_frame_count(
+            &kernel_pmm
+        );
+
+    uint64_t free_count =
+        pmm_free_count(
+            &kernel_pmm
+        );
 
     (void)frame_count;
     (void)free_count;
 
-    uint64_t frame = pmm_alloc_frame(&kernel_pmm);
+    uint64_t frame =
+        pmm_alloc_frame(
+            &kernel_pmm
+        );
 
     if (frame == PMM_INVALID_FRAME) {
         kernel_panic_at(
@@ -108,9 +129,15 @@ static void kernel_memory_init(
         );
     }
 
-    serial_write_string("[m6] frame allocated\n");
+    serial_write_string(
+        "[m6] frame allocated\n"
+    );
 
-    if (!pmm_free_frame(&kernel_pmm, frame)) {
+    if (!pmm_free_frame(
+            &kernel_pmm,
+            frame
+        )) {
+
         kernel_panic_at(
             __FILE__,
             __LINE__,
@@ -119,7 +146,9 @@ static void kernel_memory_init(
         );
     }
 
-    serial_write_string("[m6] frame freed\n");
+    serial_write_string(
+        "[m6] frame freed\n"
+    );
 }
 
 void kmain(void)
@@ -138,16 +167,24 @@ void kmain(void)
         "[MCSOS:M5] idt: loaded\n"
     );
 
-    pic_remap(0x20u, 0x28u);
+    pic_remap(
+        0x20u,
+        0x28u
+    );
 
     pic_mask_all();
-    pic_unmask_irq(0);
+
+    pic_unmask_irq(
+        0
+    );
 
     serial_write_string(
         "[MCSOS:M5] pic: remapped, IRQ0 unmasked\n"
     );
 
-    pit_configure_hz(100);
+    pit_configure_hz(
+        100
+    );
 
     serial_write_string(
         "[MCSOS:M5] pit: configured 100Hz\n"
@@ -155,13 +192,17 @@ void kmain(void)
 
     kernel_memory_init(
         test_regions,
-        sizeof(test_regions) / sizeof(test_regions[0])
+        sizeof(test_regions) /
+        sizeof(test_regions[0])
     );
 
     uint64_t root =
-        pmm_alloc_frame(&kernel_pmm);
+        pmm_alloc_frame(
+            &kernel_pmm
+        );
 
     if (root == PMM_INVALID_FRAME) {
+
         kernel_panic_at(
             __FILE__,
             __LINE__,
@@ -177,6 +218,7 @@ void kmain(void)
         );
 
     if (root_virt == 0) {
+
         kernel_panic_at(
             __FILE__,
             __LINE__,
@@ -190,16 +232,18 @@ void kmain(void)
         VMM_PAGE_SIZE
     );
 
-    int rc = vmm_space_init(
-        &kernel_space,
-        root,
-        &hhdm_offset,
-        kernel_vmm_alloc,
-        kernel_vmm_free,
-        kernel_phys_to_virt
-    );
+    int rc =
+        vmm_space_init(
+            &kernel_space,
+            root,
+            &hhdm_offset,
+            kernel_vmm_alloc,
+            kernel_vmm_free,
+            kernel_phys_to_virt
+        );
 
     if (rc != VMM_MAP_OK) {
+
         kernel_panic_at(
             __FILE__,
             __LINE__,
