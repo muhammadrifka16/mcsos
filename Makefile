@@ -236,3 +236,9 @@ clean:
 
 distclean: clean
 >rm -rf iso_root limine evidence
+
+check:
+>@echo "[CHECK] kernel build audit"
+>file build/kernel.elf
+>readelf -h build/kernel.elf
+>nm -n build/kernel.elf | grep kmain
