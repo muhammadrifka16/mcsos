@@ -75,7 +75,9 @@ LDFLAGS := \
 -z max-page-size=0x1000 \
 -T linker.ld
 
-SRC_C := $(shell find kernel -name '*.c' | LC_ALL=C sort) src/pit.c
+SRC_C := $(shell find kernel -name '*.c' | LC_ALL=C sort) \
+src/pit.c \
+src/pmm.c
 
 SRC_S := $(shell find kernel -name '*.S' | LC_ALL=C sort)
 
