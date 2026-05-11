@@ -103,6 +103,8 @@ audit \
 grade \
 iso \
 run \
+run-qemu-smoke \
+run-qemu-gdb \
 panic-iso \
 run-panic \
 clean \
@@ -196,6 +198,24 @@ run: iso
 >       -serial stdio \
 >       -no-reboot \
 >       -no-shutdown
+
+run-qemu-smoke: iso
+>qemu-system-x86_64 \
+>       -M q35 \
+>       -cdrom $(ISO_FILE) \
+>       -serial stdio \
+>       -no-reboot \
+>       -no-shutdown
+
+run-qemu-gdb: iso
+>qemu-system-x86_64 \
+>       -M q35 \
+>       -cdrom $(ISO_FILE) \
+>       -serial stdio \
+>       -no-reboot \
+>       -no-shutdown \
+>       -s \
+>       -S
 
 panic-iso: $(PANIC_KERNEL)
 >mkdir -p $(ISO_DIR)/boot/grub
