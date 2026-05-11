@@ -1,3 +1,4 @@
+#include <stddef.h>
 #include <stdint.h>
 
 #define COM1 0x3F8
@@ -63,4 +64,28 @@ void serial_write_string(const char *s)
 void serial_write(const char *s)
 {
     serial_write_string(s);
+}
+
+void serial_write_hex64(uint64_t value) {
+    static const char digits[] = "0123456789abcdef";
+    serial_write_string("0x");
+    for (int i = 60; i >= 0; i -= 4) {
+        serial_write_char(digits[(value >> (unsigned)i) & 0xFu]);
+    }
+}
+
+void serial_write_dec64(uint64_t value) {
+    char buf[21];
+    size_t i = 0;
+    if (value == 0) {
+        serial_write_char('0');
+        return;
+    }
+    while (value != 0 && i < sizeof(buf)) {
+        buf[i++] = (char)('0' + (value % 10u));
+        value /= 10u;
+    }
+    while (i != 0) {
+        serial_write_char(buf[--i]);
+    }
 }

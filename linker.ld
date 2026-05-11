@@ -4,12 +4,6 @@ SECTIONS
 {
     . = 2M;
 
-    __kernel_start = .;
-
-    .multiboot2 : ALIGN(8) {
-        KEEP(*(.multiboot2))
-    }
-
     .text : ALIGN(4K) {
         *(.text .text.*)
     }
@@ -25,13 +19,9 @@ SECTIONS
     .bss : ALIGN(4K) {
         *(COMMON)
         *(.bss .bss.*)
-
         . = ALIGN(16);
-
         __stack_bottom = .;
         . += 64K;
         __stack_top = .;
     }
-
-    __kernel_end = .;
 }
