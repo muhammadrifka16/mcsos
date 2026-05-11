@@ -8,7 +8,9 @@
 #include <mcsos/kernel/panic.h>
 
 static struct pmm_state kernel_pmm;
-static uint8_t kernel_pmm_bitmap[PMM_BITMAP_BYTES];
+
+static uint8_t kernel_pmm_bitmap[PMM_BITMAP_BYTES]
+__attribute__((aligned(4096)));
 
 static struct boot_mem_region test_regions[] = {
     { .base = 0x00000000ULL, .length = 0x0009f000ULL, .type = BOOT_MEM_USABLE },
@@ -18,56 +20,101 @@ static struct boot_mem_region test_regions[] = {
     { .base = 0x00500000ULL, .length = 0x00400000ULL, .type = BOOT_MEM_USABLE },
 };
 
-void kmain(void)
+static void kernel_memory_init(
+    const struct boot_mem_region *regions,
+    size_t region_count
+)
 {
-    cpu_cli();
-
-    serial_init();
-    serial_write_string("[MCSOS:M5] boot: external interrupt bring-up start\n");
-
-    x86_64_idt_init();
-    serial_write_string("[MCSOS:M5] idt: loaded\n");
-
-    pic_remap(0x20u, 0x28u);
-    pic_mask_all();
-    pic_unmask_irq(0);
-    serial_write_string("[MCSOS:M5] pic: remapped, IRQ0 unmasked\n");
-
-    pit_configure_hz(100);
-    serial_write_string("[MCSOS:M5] pit: configured 100Hz\n");
-
-    serial_write_string("[m6] pmm init start\n");
-
     bool ok = pmm_init_from_map(
         &kernel_pmm,
-        test_regions,
-        sizeof(test_regions) / sizeof(test_regions[0]),
+        regions,
+        region_count,
         kernel_pmm_bitmap,
         sizeof(kernel_pmm_bitmap),
         PMM_MAX_PHYS_BYTES
     );
 
     if (!ok) {
-        kernel_panic_at(__FILE__, __LINE__, "PMM INIT FAILED", 0);
+        kernel_panic_at(
+            __FILE__,
+            __LINE__,
+            "pmm_init_from_map failed",
+            0
+        );
     }
 
     serial_write_string("[m6] pmm initialized\n");
 
+    uint64_t frame_count = pmm_frame_count(&kernel_pmm);
+    uint64_t free_count = pmm_free_count(&kernel_pmm);
+
+    (void)frame_count;
+    (void)free_count;
+
     uint64_t frame = pmm_alloc_frame(&kernel_pmm);
 
     if (frame == PMM_INVALID_FRAME) {
-        kernel_panic_at(__FILE__, __LINE__, "PMM ALLOC FAILED", 0);
+        kernel_panic_at(
+            __FILE__,
+            __LINE__,
+            "pmm_alloc_frame failed",
+            0
+        );
     }
 
     serial_write_string("[m6] frame allocated\n");
 
     if (!pmm_free_frame(&kernel_pmm, frame)) {
-        kernel_panic_at(__FILE__, __LINE__, "PMM FREE FAILED", 0);
+        kernel_panic_at(
+            __FILE__,
+            __LINE__,
+            "pmm_free_frame failed",
+            0
+        );
     }
 
     serial_write_string("[m6] frame freed\n");
+}
 
-    serial_write_string("[MCSOS:M5] sti: enabling interrupts\n");
+void kmain(void)
+{
+    cpu_cli();
+
+    serial_init();
+
+    serial_write_string(
+        "[MCSOS:M5] boot: external interrupt bring-up start\n"
+    );
+
+    x86_64_idt_init();
+
+    serial_write_string(
+        "[MCSOS:M5] idt: loaded\n"
+    );
+
+    pic_remap(0x20u, 0x28u);
+
+    pic_mask_all();
+    pic_unmask_irq(0);
+
+    serial_write_string(
+        "[MCSOS:M5] pic: remapped, IRQ0 unmasked\n"
+    );
+
+    pit_configure_hz(100);
+
+    serial_write_string(
+        "[MCSOS:M5] pit: configured 100Hz\n"
+    );
+
+    kernel_memory_init(
+        test_regions,
+        sizeof(test_regions) / sizeof(test_regions[0])
+    );
+
+    serial_write_string(
+        "[MCSOS:M5] sti: enabling interrupts\n"
+    );
 
     cpu_sti();
 
