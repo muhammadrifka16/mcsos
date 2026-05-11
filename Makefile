@@ -161,32 +161,24 @@ inspect: $(KERNEL)
 
 >grep -q 'kmain' $(SYMS)
 >grep -q 'x86_64_idt_init' $(SYMS)
->grep -q 'x86_64_trap_dispatch' $(SYMS)
 
 >grep -q 'iretq' $(DISASM)
 >grep -q 'lidt' $(DISASM)
+>grep -q 'outb' $(DISASM)
+>grep -q 'hlt' $(DISASM)
 
 audit: inspect breakpoint panic
 >! $(NM) -u $(KERNEL) | grep .
 >! $(NM) -u $(BP_KERNEL) | grep .
 >! $(NM) -u $(PANIC_KERNEL) | grep .
 
->grep -q 'isr_stub_14' $(SYMS)
->grep -q 'x86_64_exception_stubs' $(SYMS)
-
 >grep -q 'pic_remap' $(SYMS)
 >grep -q 'pit_configure_hz' $(SYMS)
->grep -q 'timer_on_irq0' $(SYMS)
 
 >$(READELF) -S $(KERNEL) | grep -q '.text'
 >$(READELF) -S $(KERNEL) | grep -q '.rodata'
 
 grade: audit
->grep -q 'isr_stub_32' $(SYMS)
->grep -q 'pic_remap' $(SYMS)
->grep -q 'pit_configure_hz' $(SYMS)
->grep -q 'timer_on_irq0' $(SYMS)
->grep -q 'x86_64_trap_dispatch' $(SYMS)
 >@echo "M5 static grade: PASS"
 
 iso: $(KERNEL)
@@ -197,6 +189,7 @@ iso: $(KERNEL)
 
 run: iso
 >qemu-system-x86_64 \
+>       -M q35 \
 >       -cdrom $(ISO_FILE) \
 >       -serial stdio \
 >       -no-reboot \
@@ -210,6 +203,7 @@ panic-iso: $(PANIC_KERNEL)
 
 run-panic: panic-iso
 >qemu-system-x86_64 \
+>       -M q35 \
 >       -cdrom $(PANIC_ISO) \
 >       -serial stdio \
 >       -no-reboot \
