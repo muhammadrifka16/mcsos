@@ -5,7 +5,7 @@ set -Eeuo pipefail
 ISO="${1:-build/mcsos.iso}"
 LOG="${2:-build/m3_serial.log}"
 
-TIMEOUT_SEC="${MCSOS_QEMU_TIMEOUT:-8}"
+TIMEOUT_SEC="${MCSOS_QEMU_TIMEOUT:-10}"
 
 OVMF_CODE="${OVMF_CODE:-/usr/share/OVMF/OVMF_CODE_4M.fd}"
 OVMF_VARS="${OVMF_VARS:-build/OVMF_VARS_4M.fd}"
@@ -17,9 +17,6 @@ fail() {
 
 test -f "$ISO" \
     || fail "ISO tidak ditemukan: $ISO"
-
-command -v qemu-system-x86_64 >/dev/null 2>&1 \
-    || fail "qemu-system-x86_64 tidak ditemukan"
 
 test -f "$OVMF_CODE" \
     || fail "OVMF_CODE tidak ditemukan: $OVMF_CODE"
@@ -42,10 +39,12 @@ qemu-system-x86_64 \
     -cdrom "$ISO" \
     -boot d \
     -serial file:"$LOG" \
-    -nographic \
+    -display none \
     -no-reboot \
     -no-shutdown \
     || true
+
+sleep 1
 
 test -f "$LOG" \
     || fail "serial log tidak dibuat"

@@ -1,9 +1,11 @@
 #include <mcsos/kernel/log.h>
 
+void serial_init(void);
 void serial_write(const char *s);
 
 void log_init(void)
 {
+    serial_init();
 }
 
 void log_putc(char c)

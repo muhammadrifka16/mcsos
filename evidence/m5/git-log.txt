@@ -1,0 +1,5 @@
+8b2f510 M5: PIC remap, PIT 100Hz, IRQ0 timer tick, proper boot 32->64
+7bbf739 m5: pass static audit baseline
+9d12d52 m5: establish stable idt baseline
+b511ab1 feat(m5): add PIT timer IRQ support and static validation
+68b2235 Add PIC support for M5

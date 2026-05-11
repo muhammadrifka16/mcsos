@@ -1,6 +1,5 @@
 build/
 build_log.txt
-make
 
 iso_root/
 
@@ -10,6 +9,7 @@ iso_root/
 *.map
 *.o
 *.d
+*.log
 
 *.tar.gz
 *.tar.gz.*

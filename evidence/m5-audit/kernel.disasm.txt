@@ -1,0 +1,1049 @@
+
+build/kernel.elf:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000200000 <x86_64_idt_set_gate>:
+  200000:	55                   	push   %rbp
+  200001:	48 89 e5             	mov    %rsp,%rbp
+  200004:	48 83 ec 18          	sub    $0x18,%rsp
+  200008:	88 d0                	mov    %dl,%al
+  20000a:	40 88 f9             	mov    %dil,%cl
+  20000d:	88 4d ff             	mov    %cl,-0x1(%rbp)
+  200010:	48 89 75 f0          	mov    %rsi,-0x10(%rbp)
+  200014:	88 45 ef             	mov    %al,-0x11(%rbp)
+  200017:	66 8b 4d f0          	mov    -0x10(%rbp),%cx
+  20001b:	0f b6 45 ff          	movzbl -0x1(%rbp),%eax
+  20001f:	c1 e0 04             	shl    $0x4,%eax
+  200022:	66 89 88 00 30 20 00 	mov    %cx,0x203000(%rax)
+  200029:	0f b6 45 ff          	movzbl -0x1(%rbp),%eax
+  20002d:	c1 e0 04             	shl    $0x4,%eax
+  200030:	66 c7 80 02 30 20 00 	movw   $0x8,0x203002(%rax)
+  200037:	08 00 
+  200039:	0f b6 45 ff          	movzbl -0x1(%rbp),%eax
+  20003d:	c1 e0 04             	shl    $0x4,%eax
+  200040:	c6 80 04 30 20 00 00 	movb   $0x0,0x203004(%rax)
+  200047:	8a 4d ef             	mov    -0x11(%rbp),%cl
+  20004a:	0f b6 45 ff          	movzbl -0x1(%rbp),%eax
+  20004e:	c1 e0 04             	shl    $0x4,%eax
+  200051:	88 88 05 30 20 00    	mov    %cl,0x203005(%rax)
+  200057:	66 8b 4d f2          	mov    -0xe(%rbp),%cx
+  20005b:	0f b6 45 ff          	movzbl -0x1(%rbp),%eax
+  20005f:	c1 e0 04             	shl    $0x4,%eax
+  200062:	66 89 88 06 30 20 00 	mov    %cx,0x203006(%rax)
+  200069:	8b 4d f4             	mov    -0xc(%rbp),%ecx
+  20006c:	0f b6 45 ff          	movzbl -0x1(%rbp),%eax
+  200070:	c1 e0 04             	shl    $0x4,%eax
+  200073:	89 88 08 30 20 00    	mov    %ecx,0x203008(%rax)
+  200079:	0f b6 45 ff          	movzbl -0x1(%rbp),%eax
+  20007d:	c1 e0 04             	shl    $0x4,%eax
+  200080:	48 8d 80 00 30 20 00 	lea    0x203000(%rax),%rax
+  200087:	c7 40 0c 00 00 00 00 	movl   $0x0,0xc(%rax)
+  20008e:	48 83 c4 18          	add    $0x18,%rsp
+  200092:	5d                   	pop    %rbp
+  200093:	c3                   	ret
+  200094:	66 66 66 2e 0f 1f 84 	data16 data16 cs nopw 0x0(%rax,%rax,1)
+  20009b:	00 00 00 00 00 
+
+00000000002000a0 <x86_64_idt_init>:
+  2000a0:	55                   	push   %rbp
+  2000a1:	48 89 e5             	mov    %rsp,%rbp
+  2000a4:	48 83 ec 10          	sub    $0x10,%rsp
+  2000a8:	66 c7 45 fe 00 00    	movw   $0x0,-0x2(%rbp)
+  2000ae:	0f b7 45 fe          	movzwl -0x2(%rbp),%eax
+  2000b2:	3d 00 01 00 00       	cmp    $0x100,%eax
+  2000b7:	0f 83 25 00 00 00    	jae    2000e2 <x86_64_idt_init+0x42>
+  2000bd:	66 8b 45 fe          	mov    -0x2(%rbp),%ax
+  2000c1:	31 c9                	xor    %ecx,%ecx
+  2000c3:	31 c9                	xor    %ecx,%ecx
+  2000c5:	0f b6 f8             	movzbl %al,%edi
+  2000c8:	31 d2                	xor    %edx,%edx
+  2000ca:	89 d6                	mov    %edx,%esi
+  2000cc:	e8 2f ff ff ff       	call   200000 <x86_64_idt_set_gate>
+  2000d1:	66 8b 45 fe          	mov    -0x2(%rbp),%ax
+  2000d5:	66 83 c0 01          	add    $0x1,%ax
+  2000d9:	66 89 45 fe          	mov    %ax,-0x2(%rbp)
+  2000dd:	e9 cc ff ff ff       	jmp    2000ae <x86_64_idt_init+0xe>
+  2000e2:	48 c7 c6 38 0d 20 00 	mov    $0x200d38,%rsi
+  2000e9:	bf 03 00 00 00       	mov    $0x3,%edi
+  2000ee:	ba 8f 00 00 00       	mov    $0x8f,%edx
+  2000f3:	e8 08 ff ff ff       	call   200000 <x86_64_idt_set_gate>
+  2000f8:	66 c7 05 ff 3e 00 00 	movw   $0xfff,0x3eff(%rip)        # 204000 <idtr>
+  2000ff:	ff 0f 
+  200101:	48 c7 05 f6 3e 00 00 	movq   $0x203000,0x3ef6(%rip)        # 204002 <idtr+0x2>
+  200108:	00 30 20 00 
+  20010c:	0f 01 1d ed 3e 00 00 	lidt   0x3eed(%rip)        # 204000 <idtr>
+  200113:	48 83 c4 10          	add    $0x10,%rsp
+  200117:	5d                   	pop    %rbp
+  200118:	c3                   	ret
+  200119:	0f 1f 80 00 00 00 00 	nopl   0x0(%rax)
+
+0000000000200120 <x86_64_idt_base_for_test>:
+  200120:	55                   	push   %rbp
+  200121:	48 89 e5             	mov    %rsp,%rbp
+  200124:	48 8b 05 d7 3e 00 00 	mov    0x3ed7(%rip),%rax        # 204002 <idtr+0x2>
+  20012b:	5d                   	pop    %rbp
+  20012c:	c3                   	ret
+  20012d:	0f 1f 00             	nopl   (%rax)
+
+0000000000200130 <x86_64_idt_limit_for_test>:
+  200130:	55                   	push   %rbp
+  200131:	48 89 e5             	mov    %rsp,%rbp
+  200134:	66 8b 05 c5 3e 00 00 	mov    0x3ec5(%rip),%ax        # 204000 <idtr>
+  20013b:	0f b7 c0             	movzwl %ax,%eax
+  20013e:	5d                   	pop    %rbp
+  20013f:	c3                   	ret
+
+0000000000200140 <x86_64_trigger_breakpoint_for_test>:
+  200140:	55                   	push   %rbp
+  200141:	48 89 e5             	mov    %rsp,%rbp
+  200144:	cc                   	int3
+  200145:	5d                   	pop    %rbp
+  200146:	c3                   	ret
+  200147:	cc                   	int3
+  200148:	cc                   	int3
+  200149:	cc                   	int3
+  20014a:	cc                   	int3
+  20014b:	cc                   	int3
+  20014c:	cc                   	int3
+  20014d:	cc                   	int3
+  20014e:	cc                   	int3
+  20014f:	cc                   	int3
+
+0000000000200150 <pic_send_eoi>:
+  200150:	55                   	push   %rbp
+  200151:	48 89 e5             	mov    %rsp,%rbp
+  200154:	48 83 ec 10          	sub    $0x10,%rsp
+  200158:	40 88 f8             	mov    %dil,%al
+  20015b:	88 45 ff             	mov    %al,-0x1(%rbp)
+  20015e:	0f b6 45 ff          	movzbl -0x1(%rbp),%eax
+  200162:	83 f8 08             	cmp    $0x8,%eax
+  200165:	0f 82 0f 00 00 00    	jb     20017a <pic_send_eoi+0x2a>
+  20016b:	bf a0 00 00 00       	mov    $0xa0,%edi
+  200170:	be 20 00 00 00       	mov    $0x20,%esi
+  200175:	e8 16 00 00 00       	call   200190 <outb>
+  20017a:	be 20 00 00 00       	mov    $0x20,%esi
+  20017f:	89 f7                	mov    %esi,%edi
+  200181:	e8 0a 00 00 00       	call   200190 <outb>
+  200186:	48 83 c4 10          	add    $0x10,%rsp
+  20018a:	5d                   	pop    %rbp
+  20018b:	c3                   	ret
+  20018c:	0f 1f 40 00          	nopl   0x0(%rax)
+
+0000000000200190 <outb>:
+  200190:	55                   	push   %rbp
+  200191:	48 89 e5             	mov    %rsp,%rbp
+  200194:	48 83 ec 04          	sub    $0x4,%rsp
+  200198:	40 88 f0             	mov    %sil,%al
+  20019b:	66 89 f9             	mov    %di,%cx
+  20019e:	66 89 4d fe          	mov    %cx,-0x2(%rbp)
+  2001a2:	88 45 fd             	mov    %al,-0x3(%rbp)
+  2001a5:	8a 45 fd             	mov    -0x3(%rbp),%al
+  2001a8:	66 8b 55 fe          	mov    -0x2(%rbp),%dx
+  2001ac:	ee                   	out    %al,(%dx)
+  2001ad:	48 83 c4 04          	add    $0x4,%rsp
+  2001b1:	5d                   	pop    %rbp
+  2001b2:	c3                   	ret
+  2001b3:	66 66 66 66 2e 0f 1f 	data16 data16 data16 cs nopw 0x0(%rax,%rax,1)
+  2001ba:	84 00 00 00 00 00 
+
+00000000002001c0 <pic_remap>:
+  2001c0:	55                   	push   %rbp
+  2001c1:	48 89 e5             	mov    %rsp,%rbp
+  2001c4:	48 83 ec 20          	sub    $0x20,%rsp
+  2001c8:	40 88 f0             	mov    %sil,%al
+  2001cb:	40 88 f9             	mov    %dil,%cl
+  2001ce:	88 4d ff             	mov    %cl,-0x1(%rbp)
+  2001d1:	88 45 fe             	mov    %al,-0x2(%rbp)
+  2001d4:	bf 21 00 00 00       	mov    $0x21,%edi
+  2001d9:	89 7d f8             	mov    %edi,-0x8(%rbp)
+  2001dc:	e8 df 00 00 00       	call   2002c0 <inb>
+  2001e1:	88 05 23 3e 00 00    	mov    %al,0x3e23(%rip)        # 20400a <pic1_mask>
+  2001e7:	bf a1 00 00 00       	mov    $0xa1,%edi
+  2001ec:	89 7d f0             	mov    %edi,-0x10(%rbp)
+  2001ef:	e8 cc 00 00 00       	call   2002c0 <inb>
+  2001f4:	88 05 11 3e 00 00    	mov    %al,0x3e11(%rip)        # 20400b <pic2_mask>
+  2001fa:	bf 20 00 00 00       	mov    $0x20,%edi
+  2001ff:	be 11 00 00 00       	mov    $0x11,%esi
+  200204:	89 75 ec             	mov    %esi,-0x14(%rbp)
+  200207:	e8 84 ff ff ff       	call   200190 <outb>
+  20020c:	e8 df 00 00 00       	call   2002f0 <io_wait>
+  200211:	8b 75 ec             	mov    -0x14(%rbp),%esi
+  200214:	bf a0 00 00 00       	mov    $0xa0,%edi
+  200219:	e8 72 ff ff ff       	call   200190 <outb>
+  20021e:	e8 cd 00 00 00       	call   2002f0 <io_wait>
+  200223:	8b 7d f8             	mov    -0x8(%rbp),%edi
+  200226:	0f b6 75 ff          	movzbl -0x1(%rbp),%esi
+  20022a:	e8 61 ff ff ff       	call   200190 <outb>
+  20022f:	e8 bc 00 00 00       	call   2002f0 <io_wait>
+  200234:	8b 7d f0             	mov    -0x10(%rbp),%edi
+  200237:	0f b6 75 fe          	movzbl -0x2(%rbp),%esi
+  20023b:	e8 50 ff ff ff       	call   200190 <outb>
+  200240:	e8 ab 00 00 00       	call   2002f0 <io_wait>
+  200245:	8b 7d f8             	mov    -0x8(%rbp),%edi
+  200248:	be 04 00 00 00       	mov    $0x4,%esi
+  20024d:	e8 3e ff ff ff       	call   200190 <outb>
+  200252:	e8 99 00 00 00       	call   2002f0 <io_wait>
+  200257:	8b 7d f0             	mov    -0x10(%rbp),%edi
+  20025a:	be 02 00 00 00       	mov    $0x2,%esi
+  20025f:	e8 2c ff ff ff       	call   200190 <outb>
+  200264:	e8 87 00 00 00       	call   2002f0 <io_wait>
+  200269:	8b 7d f8             	mov    -0x8(%rbp),%edi
+  20026c:	be 01 00 00 00       	mov    $0x1,%esi
+  200271:	89 75 f4             	mov    %esi,-0xc(%rbp)
+  200274:	e8 17 ff ff ff       	call   200190 <outb>
+  200279:	e8 72 00 00 00       	call   2002f0 <io_wait>
+  20027e:	8b 7d f0             	mov    -0x10(%rbp),%edi
+  200281:	8b 75 f4             	mov    -0xc(%rbp),%esi
+  200284:	e8 07 ff ff ff       	call   200190 <outb>
+  200289:	e8 62 00 00 00       	call   2002f0 <io_wait>
+  20028e:	8b 7d f8             	mov    -0x8(%rbp),%edi
+  200291:	0f b6 35 72 3d 00 00 	movzbl 0x3d72(%rip),%esi        # 20400a <pic1_mask>
+  200298:	e8 f3 fe ff ff       	call   200190 <outb>
+  20029d:	8a 05 68 3d 00 00    	mov    0x3d68(%rip),%al        # 20400b <pic2_mask>
+  2002a3:	0f b6 f0             	movzbl %al,%esi
+  2002a6:	bf a1 00 00 00       	mov    $0xa1,%edi
+  2002ab:	e8 e0 fe ff ff       	call   200190 <outb>
+  2002b0:	48 83 c4 20          	add    $0x20,%rsp
+  2002b4:	5d                   	pop    %rbp
+  2002b5:	c3                   	ret
+  2002b6:	66 2e 0f 1f 84 00 00 	cs nopw 0x0(%rax,%rax,1)
+  2002bd:	00 00 00 
+
+00000000002002c0 <inb>:
+  2002c0:	55                   	push   %rbp
+  2002c1:	48 89 e5             	mov    %rsp,%rbp
+  2002c4:	48 83 ec 04          	sub    $0x4,%rsp
+  2002c8:	66 89 f8             	mov    %di,%ax
+  2002cb:	66 89 45 fe          	mov    %ax,-0x2(%rbp)
+  2002cf:	66 8b 55 fe          	mov    -0x2(%rbp),%dx
+  2002d3:	ec                   	in     (%dx),%al
+  2002d4:	88 45 fd             	mov    %al,-0x3(%rbp)
+  2002d7:	0f b6 45 fd          	movzbl -0x3(%rbp),%eax
+  2002db:	48 83 c4 04          	add    $0x4,%rsp
+  2002df:	5d                   	pop    %rbp
+  2002e0:	c3                   	ret
+  2002e1:	66 66 66 66 66 66 2e 	data16 data16 data16 data16 data16 cs nopw 0x0(%rax,%rax,1)
+  2002e8:	0f 1f 84 00 00 00 00 
+  2002ef:	00 
+
+00000000002002f0 <io_wait>:
+  2002f0:	55                   	push   %rbp
+  2002f1:	48 89 e5             	mov    %rsp,%rbp
+  2002f4:	31 c0                	xor    %eax,%eax
+  2002f6:	e6 80                	out    %al,$0x80
+  2002f8:	5d                   	pop    %rbp
+  2002f9:	c3                   	ret
+  2002fa:	66 0f 1f 44 00 00    	nopw   0x0(%rax,%rax,1)
+
+0000000000200300 <pic_mask_all>:
+  200300:	55                   	push   %rbp
+  200301:	48 89 e5             	mov    %rsp,%rbp
+  200304:	bf 21 00 00 00       	mov    $0x21,%edi
+  200309:	be ff 00 00 00       	mov    $0xff,%esi
+  20030e:	e8 7d fe ff ff       	call   200190 <outb>
+  200313:	bf a1 00 00 00       	mov    $0xa1,%edi
+  200318:	be ff 00 00 00       	mov    $0xff,%esi
+  20031d:	e8 6e fe ff ff       	call   200190 <outb>
+  200322:	5d                   	pop    %rbp
+  200323:	c3                   	ret
+  200324:	66 66 66 2e 0f 1f 84 	data16 data16 cs nopw 0x0(%rax,%rax,1)
+  20032b:	00 00 00 00 00 
+
+0000000000200330 <pic_unmask_irq>:
+  200330:	55                   	push   %rbp
+  200331:	48 89 e5             	mov    %rsp,%rbp
+  200334:	48 83 ec 10          	sub    $0x10,%rsp
+  200338:	40 88 f8             	mov    %dil,%al
+  20033b:	88 45 ff             	mov    %al,-0x1(%rbp)
+  20033e:	0f b6 45 ff          	movzbl -0x1(%rbp),%eax
+  200342:	83 f8 08             	cmp    $0x8,%eax
+  200345:	0f 83 0b 00 00 00    	jae    200356 <pic_unmask_irq+0x26>
+  20034b:	66 c7 45 fc 21 00    	movw   $0x21,-0x4(%rbp)
+  200351:	e9 10 00 00 00       	jmp    200366 <pic_unmask_irq+0x36>
+  200356:	66 c7 45 fc a1 00    	movw   $0xa1,-0x4(%rbp)
+  20035c:	0f b6 45 ff          	movzbl -0x1(%rbp),%eax
+  200360:	83 e8 08             	sub    $0x8,%eax
+  200363:	88 45 ff             	mov    %al,-0x1(%rbp)
+  200366:	66 8b 45 fc          	mov    -0x4(%rbp),%ax
+  20036a:	0f b7 f8             	movzwl %ax,%edi
+  20036d:	e8 4e ff ff ff       	call   2002c0 <inb>
+  200372:	0f b6 c0             	movzbl %al,%eax
+  200375:	0f b6 4d ff          	movzbl -0x1(%rbp),%ecx
+  200379:	ba 01 00 00 00       	mov    $0x1,%edx
+  20037e:	d3 e2                	shl    %cl,%edx
+  200380:	89 d1                	mov    %edx,%ecx
+  200382:	83 f1 ff             	xor    $0xffffffff,%ecx
+  200385:	0f b6 c9             	movzbl %cl,%ecx
+  200388:	21 c8                	and    %ecx,%eax
+  20038a:	88 45 fb             	mov    %al,-0x5(%rbp)
+  20038d:	66 8b 4d fc          	mov    -0x4(%rbp),%cx
+  200391:	8a 45 fb             	mov    -0x5(%rbp),%al
+  200394:	0f b7 f9             	movzwl %cx,%edi
+  200397:	0f b6 f0             	movzbl %al,%esi
+  20039a:	e8 f1 fd ff ff       	call   200190 <outb>
+  20039f:	48 83 c4 10          	add    $0x10,%rsp
+  2003a3:	5d                   	pop    %rbp
+  2003a4:	c3                   	ret
+  2003a5:	66 66 2e 0f 1f 84 00 	data16 cs nopw 0x0(%rax,%rax,1)
+  2003ac:	00 00 00 00 
+
+00000000002003b0 <pic_read_master_mask>:
+  2003b0:	55                   	push   %rbp
+  2003b1:	48 89 e5             	mov    %rsp,%rbp
+  2003b4:	bf 21 00 00 00       	mov    $0x21,%edi
+  2003b9:	e8 02 ff ff ff       	call   2002c0 <inb>
+  2003be:	0f b6 c0             	movzbl %al,%eax
+  2003c1:	5d                   	pop    %rbp
+  2003c2:	c3                   	ret
+  2003c3:	66 66 66 66 2e 0f 1f 	data16 data16 data16 cs nopw 0x0(%rax,%rax,1)
+  2003ca:	84 00 00 00 00 00 
+
+00000000002003d0 <pic_read_slave_mask>:
+  2003d0:	55                   	push   %rbp
+  2003d1:	48 89 e5             	mov    %rsp,%rbp
+  2003d4:	bf a1 00 00 00       	mov    $0xa1,%edi
+  2003d9:	e8 e2 fe ff ff       	call   2002c0 <inb>
+  2003de:	0f b6 c0             	movzbl %al,%eax
+  2003e1:	5d                   	pop    %rbp
+  2003e2:	c3                   	ret
+  2003e3:	cc                   	int3
+  2003e4:	cc                   	int3
+  2003e5:	cc                   	int3
+  2003e6:	cc                   	int3
+  2003e7:	cc                   	int3
+  2003e8:	cc                   	int3
+  2003e9:	cc                   	int3
+  2003ea:	cc                   	int3
+  2003eb:	cc                   	int3
+  2003ec:	cc                   	int3
+  2003ed:	cc                   	int3
+  2003ee:	cc                   	int3
+  2003ef:	cc                   	int3
+
+00000000002003f0 <kmain>:
+  2003f0:	55                   	push   %rbp
+  2003f1:	48 89 e5             	mov    %rsp,%rbp
+  2003f4:	48 83 ec 10          	sub    $0x10,%rsp
+  2003f8:	b8 00 80 0b 00       	mov    $0xb8000,%eax
+  2003fd:	48 89 45 f8          	mov    %rax,-0x8(%rbp)
+  200401:	48 8b 45 f8          	mov    -0x8(%rbp),%rax
+  200405:	66 c7 00 42 0f       	movw   $0xf42,(%rax)
+  20040a:	e8 91 fc ff ff       	call   2000a0 <x86_64_idt_init>
+  20040f:	48 8b 45 f8          	mov    -0x8(%rbp),%rax
+  200413:	66 c7 40 02 44 0f    	movw   $0xf44,0x2(%rax)
+  200419:	f4                   	hlt
+  20041a:	e9 fa ff ff ff       	jmp    200419 <kmain+0x29>
+  20041f:	cc                   	int3
+
+0000000000200420 <log_init>:
+  200420:	55                   	push   %rbp
+  200421:	48 89 e5             	mov    %rsp,%rbp
+  200424:	e8 c7 03 00 00       	call   2007f0 <serial_init>
+  200429:	5d                   	pop    %rbp
+  20042a:	c3                   	ret
+  20042b:	0f 1f 44 00 00       	nopl   0x0(%rax,%rax,1)
+
+0000000000200430 <log_putc>:
+  200430:	55                   	push   %rbp
+  200431:	48 89 e5             	mov    %rsp,%rbp
+  200434:	48 83 ec 10          	sub    $0x10,%rsp
+  200438:	40 88 f8             	mov    %dil,%al
+  20043b:	88 45 ff             	mov    %al,-0x1(%rbp)
+  20043e:	8a 45 ff             	mov    -0x1(%rbp),%al
+  200441:	88 45 fd             	mov    %al,-0x3(%rbp)
+  200444:	c6 45 fe 00          	movb   $0x0,-0x2(%rbp)
+  200448:	48 8d 7d fd          	lea    -0x3(%rbp),%rdi
+  20044c:	e8 ef 04 00 00       	call   200940 <serial_write>
+  200451:	48 83 c4 10          	add    $0x10,%rsp
+  200455:	5d                   	pop    %rbp
+  200456:	c3                   	ret
+  200457:	66 0f 1f 84 00 00 00 	nopw   0x0(%rax,%rax,1)
+  20045e:	00 00 
+
+0000000000200460 <log_write>:
+  200460:	55                   	push   %rbp
+  200461:	48 89 e5             	mov    %rsp,%rbp
+  200464:	48 83 ec 10          	sub    $0x10,%rsp
+  200468:	48 89 7d f8          	mov    %rdi,-0x8(%rbp)
+  20046c:	48 8b 7d f8          	mov    -0x8(%rbp),%rdi
+  200470:	e8 cb 04 00 00       	call   200940 <serial_write>
+  200475:	48 83 c4 10          	add    $0x10,%rsp
+  200479:	5d                   	pop    %rbp
+  20047a:	c3                   	ret
+  20047b:	0f 1f 44 00 00       	nopl   0x0(%rax,%rax,1)
+
+0000000000200480 <log_writeln>:
+  200480:	55                   	push   %rbp
+  200481:	48 89 e5             	mov    %rsp,%rbp
+  200484:	48 83 ec 10          	sub    $0x10,%rsp
+  200488:	48 89 7d f8          	mov    %rdi,-0x8(%rbp)
+  20048c:	48 8b 7d f8          	mov    -0x8(%rbp),%rdi
+  200490:	e8 ab 04 00 00       	call   200940 <serial_write>
+  200495:	48 c7 c7 4d 12 20 00 	mov    $0x20124d,%rdi
+  20049c:	e8 9f 04 00 00       	call   200940 <serial_write>
+  2004a1:	48 83 c4 10          	add    $0x10,%rsp
+  2004a5:	5d                   	pop    %rbp
+  2004a6:	c3                   	ret
+  2004a7:	66 0f 1f 84 00 00 00 	nopw   0x0(%rax,%rax,1)
+  2004ae:	00 00 
+
+00000000002004b0 <log_hex64>:
+  2004b0:	55                   	push   %rbp
+  2004b1:	48 89 e5             	mov    %rsp,%rbp
+  2004b4:	48 83 ec 30          	sub    $0x30,%rsp
+  2004b8:	48 89 7d f8          	mov    %rdi,-0x8(%rbp)
+  2004bc:	c7 45 dc 00 00 00 00 	movl   $0x0,-0x24(%rbp)
+  2004c3:	83 7d dc 10          	cmpl   $0x10,-0x24(%rbp)
+  2004c7:	0f 8d 38 00 00 00    	jge    200505 <log_hex64+0x55>
+  2004cd:	48 8b 45 f8          	mov    -0x8(%rbp),%rax
+  2004d1:	83 e0 0f             	and    $0xf,%eax
+  2004d4:	48 8d 80 40 14 20 00 	lea    0x201440(%rax),%rax
+  2004db:	8a 08                	mov    (%rax),%cl
+  2004dd:	b8 0f 00 00 00       	mov    $0xf,%eax
+  2004e2:	2b 45 dc             	sub    -0x24(%rbp),%eax
+  2004e5:	48 98                	cltq
+  2004e7:	88 4c 05 e0          	mov    %cl,-0x20(%rbp,%rax,1)
+  2004eb:	48 8b 45 f8          	mov    -0x8(%rbp),%rax
+  2004ef:	48 c1 e8 04          	shr    $0x4,%rax
+  2004f3:	48 89 45 f8          	mov    %rax,-0x8(%rbp)
+  2004f7:	8b 45 dc             	mov    -0x24(%rbp),%eax
+  2004fa:	83 c0 01             	add    $0x1,%eax
+  2004fd:	89 45 dc             	mov    %eax,-0x24(%rbp)
+  200500:	e9 be ff ff ff       	jmp    2004c3 <log_hex64+0x13>
+  200505:	c6 45 f0 00          	movb   $0x0,-0x10(%rbp)
+  200509:	48 8d 7d e0          	lea    -0x20(%rbp),%rdi
+  20050d:	e8 2e 04 00 00       	call   200940 <serial_write>
+  200512:	48 83 c4 30          	add    $0x30,%rsp
+  200516:	5d                   	pop    %rbp
+  200517:	c3                   	ret
+  200518:	0f 1f 84 00 00 00 00 	nopl   0x0(%rax,%rax,1)
+  20051f:	00 
+
+0000000000200520 <log_key_value_hex64>:
+  200520:	55                   	push   %rbp
+  200521:	48 89 e5             	mov    %rsp,%rbp
+  200524:	48 83 ec 10          	sub    $0x10,%rsp
+  200528:	48 89 7d f8          	mov    %rdi,-0x8(%rbp)
+  20052c:	48 89 75 f0          	mov    %rsi,-0x10(%rbp)
+  200530:	48 8b 7d f8          	mov    -0x8(%rbp),%rdi
+  200534:	e8 27 ff ff ff       	call   200460 <log_write>
+  200539:	48 c7 c7 6d 10 20 00 	mov    $0x20106d,%rdi
+  200540:	e8 1b ff ff ff       	call   200460 <log_write>
+  200545:	48 8b 7d f0          	mov    -0x10(%rbp),%rdi
+  200549:	e8 62 ff ff ff       	call   2004b0 <log_hex64>
+  20054e:	48 c7 c7 4d 12 20 00 	mov    $0x20124d,%rdi
+  200555:	e8 06 ff ff ff       	call   200460 <log_write>
+  20055a:	48 83 c4 10          	add    $0x10,%rsp
+  20055e:	5d                   	pop    %rbp
+  20055f:	c3                   	ret
+
+0000000000200560 <kernel_panic_at>:
+  200560:	55                   	push   %rbp
+  200561:	48 89 e5             	mov    %rsp,%rbp
+  200564:	48 83 ec 40          	sub    $0x40,%rsp
+  200568:	48 89 7d f8          	mov    %rdi,-0x8(%rbp)
+  20056c:	89 75 f4             	mov    %esi,-0xc(%rbp)
+  20056f:	48 89 55 e8          	mov    %rdx,-0x18(%rbp)
+  200573:	48 89 4d e0          	mov    %rcx,-0x20(%rbp)
+  200577:	e8 44 01 00 00       	call   2006c0 <cpu_read_rflags>
+  20057c:	48 89 45 d8          	mov    %rax,-0x28(%rbp)
+  200580:	e8 5b 01 00 00       	call   2006e0 <cpu_cli>
+  200585:	48 c7 c7 72 10 20 00 	mov    $0x201072,%rdi
+  20058c:	e8 ef fe ff ff       	call   200480 <log_writeln>
+  200591:	48 c7 c7 d8 13 20 00 	mov    $0x2013d8,%rdi
+  200598:	e8 e3 fe ff ff       	call   200480 <log_writeln>
+  20059d:	48 c7 c7 00 10 20 00 	mov    $0x201000,%rdi
+  2005a4:	e8 b7 fe ff ff       	call   200460 <log_write>
+  2005a9:	48 c7 c7 0e 13 20 00 	mov    $0x20130e,%rdi
+  2005b0:	e8 ab fe ff ff       	call   200460 <log_write>
+  2005b5:	48 c7 c7 b3 12 20 00 	mov    $0x2012b3,%rdi
+  2005bc:	e8 9f fe ff ff       	call   200460 <log_write>
+  2005c1:	48 c7 c7 36 11 20 00 	mov    $0x201136,%rdi
+  2005c8:	e8 93 fe ff ff       	call   200460 <log_write>
+  2005cd:	48 c7 c7 9f 11 20 00 	mov    $0x20119f,%rdi
+  2005d4:	e8 87 fe ff ff       	call   200460 <log_write>
+  2005d9:	48 c7 c7 ab 11 20 00 	mov    $0x2011ab,%rdi
+  2005e0:	e8 9b fe ff ff       	call   200480 <log_writeln>
+  2005e5:	48 c7 c7 5a 10 20 00 	mov    $0x20105a,%rdi
+  2005ec:	e8 6f fe ff ff       	call   200460 <log_write>
+  2005f1:	48 83 7d e8 00       	cmpq   $0x0,-0x18(%rbp)
+  2005f6:	0f 84 0d 00 00 00    	je     200609 <kernel_panic_at+0xa9>
+  2005fc:	48 8b 45 e8          	mov    -0x18(%rbp),%rax
+  200600:	48 89 45 d0          	mov    %rax,-0x30(%rbp)
+  200604:	e9 10 00 00 00       	jmp    200619 <kernel_panic_at+0xb9>
+  200609:	48 c7 c0 fb 12 20 00 	mov    $0x2012fb,%rax
+  200610:	48 89 45 d0          	mov    %rax,-0x30(%rbp)
+  200614:	e9 00 00 00 00       	jmp    200619 <kernel_panic_at+0xb9>
+  200619:	48 8b 7d d0          	mov    -0x30(%rbp),%rdi
+  20061d:	e8 5e fe ff ff       	call   200480 <log_writeln>
+  200622:	48 c7 c7 50 10 20 00 	mov    $0x201050,%rdi
+  200629:	e8 32 fe ff ff       	call   200460 <log_write>
+  20062e:	48 83 7d f8 00       	cmpq   $0x0,-0x8(%rbp)
+  200633:	0f 84 0d 00 00 00    	je     200646 <kernel_panic_at+0xe6>
+  200639:	48 8b 45 f8          	mov    -0x8(%rbp),%rax
+  20063d:	48 89 45 c8          	mov    %rax,-0x38(%rbp)
+  200641:	e9 10 00 00 00       	jmp    200656 <kernel_panic_at+0xf6>
+  200646:	48 c7 c0 c5 10 20 00 	mov    $0x2010c5,%rax
+  20064d:	48 89 45 c8          	mov    %rax,-0x38(%rbp)
+  200651:	e9 00 00 00 00       	jmp    200656 <kernel_panic_at+0xf6>
+  200656:	48 8b 7d c8          	mov    -0x38(%rbp),%rdi
+  20065a:	e8 01 fe ff ff       	call   200460 <log_write>
+  20065f:	48 c7 c7 db 11 20 00 	mov    $0x2011db,%rdi
+  200666:	e8 f5 fd ff ff       	call   200460 <log_write>
+  20066b:	8b 7d f4             	mov    -0xc(%rbp),%edi
+  20066e:	e8 7d 00 00 00       	call   2006f0 <log_dec_u32>
+  200673:	bf 0a 00 00 00       	mov    $0xa,%edi
+  200678:	e8 b3 fd ff ff       	call   200430 <log_putc>
+  20067d:	48 8b 75 e0          	mov    -0x20(%rbp),%rsi
+  200681:	48 c7 c7 5c 11 20 00 	mov    $0x20115c,%rdi
+  200688:	e8 93 fe ff ff       	call   200520 <log_key_value_hex64>
+  20068d:	48 8b 75 d8          	mov    -0x28(%rbp),%rsi
+  200691:	48 c7 c7 1a 12 20 00 	mov    $0x20121a,%rdi
+  200698:	e8 83 fe ff ff       	call   200520 <log_key_value_hex64>
+  20069d:	48 c7 c7 8f 13 20 00 	mov    $0x20138f,%rdi
+  2006a4:	e8 d7 fd ff ff       	call   200480 <log_writeln>
+  2006a9:	48 c7 c7 90 10 20 00 	mov    $0x201090,%rdi
+  2006b0:	e8 cb fd ff ff       	call   200480 <log_writeln>
+  2006b5:	e8 06 01 00 00       	call   2007c0 <cpu_halt_forever>
+  2006ba:	66 0f 1f 44 00 00    	nopw   0x0(%rax,%rax,1)
+
+00000000002006c0 <cpu_read_rflags>:
+  2006c0:	55                   	push   %rbp
+  2006c1:	48 89 e5             	mov    %rsp,%rbp
+  2006c4:	50                   	push   %rax
+  2006c5:	9c                   	pushf
+  2006c6:	58                   	pop    %rax
+  2006c7:	48 89 45 f8          	mov    %rax,-0x8(%rbp)
+  2006cb:	48 8b 45 f8          	mov    -0x8(%rbp),%rax
+  2006cf:	48 83 c4 08          	add    $0x8,%rsp
+  2006d3:	5d                   	pop    %rbp
+  2006d4:	c3                   	ret
+  2006d5:	66 66 2e 0f 1f 84 00 	data16 cs nopw 0x0(%rax,%rax,1)
+  2006dc:	00 00 00 00 
+
+00000000002006e0 <cpu_cli>:
+  2006e0:	55                   	push   %rbp
+  2006e1:	48 89 e5             	mov    %rsp,%rbp
+  2006e4:	fa                   	cli
+  2006e5:	5d                   	pop    %rbp
+  2006e6:	c3                   	ret
+  2006e7:	66 0f 1f 84 00 00 00 	nopw   0x0(%rax,%rax,1)
+  2006ee:	00 00 
+
+00000000002006f0 <log_dec_u32>:
+  2006f0:	55                   	push   %rbp
+  2006f1:	48 89 e5             	mov    %rsp,%rbp
+  2006f4:	48 83 ec 20          	sub    $0x20,%rsp
+  2006f8:	89 7d fc             	mov    %edi,-0x4(%rbp)
+  2006fb:	c7 45 ec 00 00 00 00 	movl   $0x0,-0x14(%rbp)
+  200702:	83 7d fc 00          	cmpl   $0x0,-0x4(%rbp)
+  200706:	0f 85 0f 00 00 00    	jne    20071b <log_dec_u32+0x2b>
+  20070c:	bf 30 00 00 00       	mov    $0x30,%edi
+  200711:	e8 1a fd ff ff       	call   200430 <log_putc>
+  200716:	e9 92 00 00 00       	jmp    2007ad <log_dec_u32+0xbd>
+  20071b:	e9 00 00 00 00       	jmp    200720 <log_dec_u32+0x30>
+  200720:	31 c0                	xor    %eax,%eax
+  200722:	83 7d fc 00          	cmpl   $0x0,-0x4(%rbp)
+  200726:	88 45 eb             	mov    %al,-0x15(%rbp)
+  200729:	0f 84 0d 00 00 00    	je     20073c <log_dec_u32+0x4c>
+  20072f:	8b 45 ec             	mov    -0x14(%rbp),%eax
+  200732:	48 83 f8 0b          	cmp    $0xb,%rax
+  200736:	0f 92 c0             	setb   %al
+  200739:	88 45 eb             	mov    %al,-0x15(%rbp)
+  20073c:	8a 45 eb             	mov    -0x15(%rbp),%al
+  20073f:	a8 01                	test   $0x1,%al
+  200741:	0f 85 05 00 00 00    	jne    20074c <log_dec_u32+0x5c>
+  200747:	e9 36 00 00 00       	jmp    200782 <log_dec_u32+0x92>
+  20074c:	8b 45 fc             	mov    -0x4(%rbp),%eax
+  20074f:	b9 0a 00 00 00       	mov    $0xa,%ecx
+  200754:	31 d2                	xor    %edx,%edx
+  200756:	f7 f1                	div    %ecx
+  200758:	83 c2 30             	add    $0x30,%edx
+  20075b:	88 d1                	mov    %dl,%cl
+  20075d:	8b 45 ec             	mov    -0x14(%rbp),%eax
+  200760:	89 c2                	mov    %eax,%edx
+  200762:	83 c2 01             	add    $0x1,%edx
+  200765:	89 55 ec             	mov    %edx,-0x14(%rbp)
+  200768:	89 c0                	mov    %eax,%eax
+  20076a:	88 4c 05 f1          	mov    %cl,-0xf(%rbp,%rax,1)
+  20076e:	8b 45 fc             	mov    -0x4(%rbp),%eax
+  200771:	b9 0a 00 00 00       	mov    $0xa,%ecx
+  200776:	31 d2                	xor    %edx,%edx
+  200778:	f7 f1                	div    %ecx
+  20077a:	89 45 fc             	mov    %eax,-0x4(%rbp)
+  20077d:	e9 9e ff ff ff       	jmp    200720 <log_dec_u32+0x30>
+  200782:	e9 00 00 00 00       	jmp    200787 <log_dec_u32+0x97>
+  200787:	83 7d ec 00          	cmpl   $0x0,-0x14(%rbp)
+  20078b:	0f 84 1c 00 00 00    	je     2007ad <log_dec_u32+0xbd>
+  200791:	8b 45 ec             	mov    -0x14(%rbp),%eax
+  200794:	83 c0 ff             	add    $0xffffffff,%eax
+  200797:	89 45 ec             	mov    %eax,-0x14(%rbp)
+  20079a:	89 c0                	mov    %eax,%eax
+  20079c:	8a 44 05 f1          	mov    -0xf(%rbp,%rax,1),%al
+  2007a0:	0f be f8             	movsbl %al,%edi
+  2007a3:	e8 88 fc ff ff       	call   200430 <log_putc>
+  2007a8:	e9 da ff ff ff       	jmp    200787 <log_dec_u32+0x97>
+  2007ad:	48 83 c4 20          	add    $0x20,%rsp
+  2007b1:	5d                   	pop    %rbp
+  2007b2:	c3                   	ret
+  2007b3:	66 66 66 66 2e 0f 1f 	data16 data16 data16 cs nopw 0x0(%rax,%rax,1)
+  2007ba:	84 00 00 00 00 00 
+
+00000000002007c0 <cpu_halt_forever>:
+  2007c0:	55                   	push   %rbp
+  2007c1:	48 89 e5             	mov    %rsp,%rbp
+  2007c4:	e8 17 ff ff ff       	call   2006e0 <cpu_cli>
+  2007c9:	e8 12 00 00 00       	call   2007e0 <cpu_hlt>
+  2007ce:	e9 f6 ff ff ff       	jmp    2007c9 <cpu_halt_forever+0x9>
+  2007d3:	66 66 66 66 2e 0f 1f 	data16 data16 data16 cs nopw 0x0(%rax,%rax,1)
+  2007da:	84 00 00 00 00 00 
+
+00000000002007e0 <cpu_hlt>:
+  2007e0:	55                   	push   %rbp
+  2007e1:	48 89 e5             	mov    %rsp,%rbp
+  2007e4:	f4                   	hlt
+  2007e5:	5d                   	pop    %rbp
+  2007e6:	c3                   	ret
+  2007e7:	cc                   	int3
+  2007e8:	cc                   	int3
+  2007e9:	cc                   	int3
+  2007ea:	cc                   	int3
+  2007eb:	cc                   	int3
+  2007ec:	cc                   	int3
+  2007ed:	cc                   	int3
+  2007ee:	cc                   	int3
+  2007ef:	cc                   	int3
+
+00000000002007f0 <serial_init>:
+  2007f0:	55                   	push   %rbp
+  2007f1:	48 89 e5             	mov    %rsp,%rbp
+  2007f4:	31 c0                	xor    %eax,%eax
+  2007f6:	bf f9 03 00 00       	mov    $0x3f9,%edi
+  2007fb:	31 f6                	xor    %esi,%esi
+  2007fd:	e8 5e 00 00 00       	call   200860 <outb>
+  200802:	bf fb 03 00 00       	mov    $0x3fb,%edi
+  200807:	be 80 00 00 00       	mov    $0x80,%esi
+  20080c:	e8 4f 00 00 00       	call   200860 <outb>
+  200811:	bf f8 03 00 00       	mov    $0x3f8,%edi
+  200816:	be 03 00 00 00       	mov    $0x3,%esi
+  20081b:	e8 40 00 00 00       	call   200860 <outb>
+  200820:	31 c0                	xor    %eax,%eax
+  200822:	bf f9 03 00 00       	mov    $0x3f9,%edi
+  200827:	31 f6                	xor    %esi,%esi
+  200829:	e8 32 00 00 00       	call   200860 <outb>
+  20082e:	bf fb 03 00 00       	mov    $0x3fb,%edi
+  200833:	be 03 00 00 00       	mov    $0x3,%esi
+  200838:	e8 23 00 00 00       	call   200860 <outb>
+  20083d:	bf fa 03 00 00       	mov    $0x3fa,%edi
+  200842:	be c7 00 00 00       	mov    $0xc7,%esi
+  200847:	e8 14 00 00 00       	call   200860 <outb>
+  20084c:	bf fc 03 00 00       	mov    $0x3fc,%edi
+  200851:	be 0b 00 00 00       	mov    $0xb,%esi
+  200856:	e8 05 00 00 00       	call   200860 <outb>
+  20085b:	5d                   	pop    %rbp
+  20085c:	c3                   	ret
+  20085d:	0f 1f 00             	nopl   (%rax)
+
+0000000000200860 <outb>:
+  200860:	55                   	push   %rbp
+  200861:	48 89 e5             	mov    %rsp,%rbp
+  200864:	48 83 ec 04          	sub    $0x4,%rsp
+  200868:	40 88 f0             	mov    %sil,%al
+  20086b:	66 89 f9             	mov    %di,%cx
+  20086e:	66 89 4d fe          	mov    %cx,-0x2(%rbp)
+  200872:	88 45 fd             	mov    %al,-0x3(%rbp)
+  200875:	8a 45 fd             	mov    -0x3(%rbp),%al
+  200878:	66 8b 55 fe          	mov    -0x2(%rbp),%dx
+  20087c:	ee                   	out    %al,(%dx)
+  20087d:	48 83 c4 04          	add    $0x4,%rsp
+  200881:	5d                   	pop    %rbp
+  200882:	c3                   	ret
+  200883:	66 66 66 66 2e 0f 1f 	data16 data16 data16 cs nopw 0x0(%rax,%rax,1)
+  20088a:	84 00 00 00 00 00 
+
+0000000000200890 <serial_write_char>:
+  200890:	55                   	push   %rbp
+  200891:	48 89 e5             	mov    %rsp,%rbp
+  200894:	48 83 ec 10          	sub    $0x10,%rsp
+  200898:	40 88 f8             	mov    %dil,%al
+  20089b:	88 45 ff             	mov    %al,-0x1(%rbp)
+  20089e:	e8 3d 00 00 00       	call   2008e0 <serial_transmit_ready>
+  2008a3:	83 f8 00             	cmp    $0x0,%eax
+  2008a6:	0f 95 c0             	setne  %al
+  2008a9:	34 ff                	xor    $0xff,%al
+  2008ab:	a8 01                	test   $0x1,%al
+  2008ad:	0f 85 05 00 00 00    	jne    2008b8 <serial_write_char+0x28>
+  2008b3:	e9 05 00 00 00       	jmp    2008bd <serial_write_char+0x2d>
+  2008b8:	e9 e1 ff ff ff       	jmp    20089e <serial_write_char+0xe>
+  2008bd:	8a 45 ff             	mov    -0x1(%rbp),%al
+  2008c0:	0f b6 f0             	movzbl %al,%esi
+  2008c3:	bf f8 03 00 00       	mov    $0x3f8,%edi
+  2008c8:	e8 93 ff ff ff       	call   200860 <outb>
+  2008cd:	48 83 c4 10          	add    $0x10,%rsp
+  2008d1:	5d                   	pop    %rbp
+  2008d2:	c3                   	ret
+  2008d3:	66 66 66 66 2e 0f 1f 	data16 data16 data16 cs nopw 0x0(%rax,%rax,1)
+  2008da:	84 00 00 00 00 00 
+
+00000000002008e0 <serial_transmit_ready>:
+  2008e0:	55                   	push   %rbp
+  2008e1:	48 89 e5             	mov    %rsp,%rbp
+  2008e4:	bf fd 03 00 00       	mov    $0x3fd,%edi
+  2008e9:	e8 72 00 00 00       	call   200960 <inb>
+  2008ee:	0f b6 c0             	movzbl %al,%eax
+  2008f1:	83 e0 20             	and    $0x20,%eax
+  2008f4:	5d                   	pop    %rbp
+  2008f5:	c3                   	ret
+  2008f6:	66 2e 0f 1f 84 00 00 	cs nopw 0x0(%rax,%rax,1)
+  2008fd:	00 00 00 
+
+0000000000200900 <serial_write_string>:
+  200900:	55                   	push   %rbp
+  200901:	48 89 e5             	mov    %rsp,%rbp
+  200904:	48 83 ec 10          	sub    $0x10,%rsp
+  200908:	48 89 7d f8          	mov    %rdi,-0x8(%rbp)
+  20090c:	48 8b 45 f8          	mov    -0x8(%rbp),%rax
+  200910:	80 38 00             	cmpb   $0x0,(%rax)
+  200913:	0f 84 1e 00 00 00    	je     200937 <serial_write_string+0x37>
+  200919:	48 8b 45 f8          	mov    -0x8(%rbp),%rax
+  20091d:	48 89 c1             	mov    %rax,%rcx
+  200920:	48 83 c1 01          	add    $0x1,%rcx
+  200924:	48 89 4d f8          	mov    %rcx,-0x8(%rbp)
+  200928:	8a 00                	mov    (%rax),%al
+  20092a:	0f be f8             	movsbl %al,%edi
+  20092d:	e8 5e ff ff ff       	call   200890 <serial_write_char>
+  200932:	e9 d5 ff ff ff       	jmp    20090c <serial_write_string+0xc>
+  200937:	48 83 c4 10          	add    $0x10,%rsp
+  20093b:	5d                   	pop    %rbp
+  20093c:	c3                   	ret
+  20093d:	0f 1f 00             	nopl   (%rax)
+
+0000000000200940 <serial_write>:
+  200940:	55                   	push   %rbp
+  200941:	48 89 e5             	mov    %rsp,%rbp
+  200944:	48 83 ec 10          	sub    $0x10,%rsp
+  200948:	48 89 7d f8          	mov    %rdi,-0x8(%rbp)
+  20094c:	48 8b 7d f8          	mov    -0x8(%rbp),%rdi
+  200950:	e8 ab ff ff ff       	call   200900 <serial_write_string>
+  200955:	48 83 c4 10          	add    $0x10,%rsp
+  200959:	5d                   	pop    %rbp
+  20095a:	c3                   	ret
+  20095b:	0f 1f 44 00 00       	nopl   0x0(%rax,%rax,1)
+
+0000000000200960 <inb>:
+  200960:	55                   	push   %rbp
+  200961:	48 89 e5             	mov    %rsp,%rbp
+  200964:	48 83 ec 04          	sub    $0x4,%rsp
+  200968:	66 89 f8             	mov    %di,%ax
+  20096b:	66 89 45 fe          	mov    %ax,-0x2(%rbp)
+  20096f:	66 8b 55 fe          	mov    -0x2(%rbp),%dx
+  200973:	ec                   	in     (%dx),%al
+  200974:	88 45 fd             	mov    %al,-0x3(%rbp)
+  200977:	0f b6 45 fd          	movzbl -0x3(%rbp),%eax
+  20097b:	48 83 c4 04          	add    $0x4,%rsp
+  20097f:	5d                   	pop    %rbp
+  200980:	c3                   	ret
+  200981:	cc                   	int3
+  200982:	cc                   	int3
+  200983:	cc                   	int3
+  200984:	cc                   	int3
+  200985:	cc                   	int3
+  200986:	cc                   	int3
+  200987:	cc                   	int3
+  200988:	cc                   	int3
+  200989:	cc                   	int3
+  20098a:	cc                   	int3
+  20098b:	cc                   	int3
+  20098c:	cc                   	int3
+  20098d:	cc                   	int3
+  20098e:	cc                   	int3
+  20098f:	cc                   	int3
+
+0000000000200990 <m4_trap_count_for_test>:
+  200990:	55                   	push   %rbp
+  200991:	48 89 e5             	mov    %rsp,%rbp
+  200994:	48 8b 05 75 36 00 00 	mov    0x3675(%rip),%rax        # 204010 <trap_count>
+  20099b:	5d                   	pop    %rbp
+  20099c:	c3                   	ret
+  20099d:	0f 1f 00             	nopl   (%rax)
+
+00000000002009a0 <x86_64_trap_dispatch>:
+  2009a0:	55                   	push   %rbp
+  2009a1:	48 89 e5             	mov    %rsp,%rbp
+  2009a4:	48 83 ec 10          	sub    $0x10,%rsp
+  2009a8:	48 89 7d f8          	mov    %rdi,-0x8(%rbp)
+  2009ac:	48 83 7d f8 00       	cmpq   $0x0,-0x8(%rbp)
+  2009b1:	0f 85 1d 00 00 00    	jne    2009d4 <x86_64_trap_dispatch+0x34>
+  2009b7:	48 c7 c7 18 10 20 00 	mov    $0x201018,%rdi
+  2009be:	48 c7 c2 cf 10 20 00 	mov    $0x2010cf,%rdx
+  2009c5:	be 4a 00 00 00       	mov    $0x4a,%esi
+  2009ca:	b9 10 47 5e a5       	mov    $0xa55e4710,%ecx
+  2009cf:	e8 8c fb ff ff       	call   200560 <kernel_panic_at>
+  2009d4:	e9 00 00 00 00       	jmp    2009d9 <x86_64_trap_dispatch+0x39>
+  2009d9:	48 8b 05 30 36 00 00 	mov    0x3630(%rip),%rax        # 204010 <trap_count>
+  2009e0:	48 ff c0             	inc    %rax
+  2009e3:	48 89 05 26 36 00 00 	mov    %rax,0x3626(%rip)        # 204010 <trap_count>
+  2009ea:	48 8b 45 f8          	mov    -0x8(%rbp),%rax
+  2009ee:	48 83 78 78 20       	cmpq   $0x20,0x78(%rax)
+  2009f3:	0f 82 40 00 00 00    	jb     200a39 <x86_64_trap_dispatch+0x99>
+  2009f9:	48 8b 45 f8          	mov    -0x8(%rbp),%rax
+  2009fd:	48 83 78 78 2f       	cmpq   $0x2f,0x78(%rax)
+  200a02:	0f 87 31 00 00 00    	ja     200a39 <x86_64_trap_dispatch+0x99>
+  200a08:	48 8b 45 f8          	mov    -0x8(%rbp),%rax
+  200a0c:	48 8b 40 78          	mov    0x78(%rax),%rax
+  200a10:	48 83 e8 20          	sub    $0x20,%rax
+  200a14:	88 45 f7             	mov    %al,-0x9(%rbp)
+  200a17:	0f b6 45 f7          	movzbl -0x9(%rbp),%eax
+  200a1b:	83 f8 00             	cmp    $0x0,%eax
+  200a1e:	0f 85 05 00 00 00    	jne    200a29 <x86_64_trap_dispatch+0x89>
+  200a24:	e8 f7 02 00 00       	call   200d20 <timer_on_irq0>
+  200a29:	8a 45 f7             	mov    -0x9(%rbp),%al
+  200a2c:	0f b6 f8             	movzbl %al,%edi
+  200a2f:	e8 1c f7 ff ff       	call   200150 <pic_send_eoi>
+  200a34:	e9 6a 00 00 00       	jmp    200aa3 <x86_64_trap_dispatch+0x103>
+  200a39:	48 c7 c7 3d 11 20 00 	mov    $0x20113d,%rdi
+  200a40:	e8 1b fa ff ff       	call   200460 <log_write>
+  200a45:	48 8b 45 f8          	mov    -0x8(%rbp),%rax
+  200a49:	48 8b 78 78          	mov    0x78(%rax),%rdi
+  200a4d:	e8 5e 00 00 00       	call   200ab0 <trap_name>
+  200a52:	48 89 c7             	mov    %rax,%rdi
+  200a55:	e8 26 fa ff ff       	call   200480 <log_writeln>
+  200a5a:	48 8b 7d f8          	mov    -0x8(%rbp),%rdi
+  200a5e:	e8 9d 00 00 00       	call   200b00 <log_trap_frame>
+  200a63:	48 8b 45 f8          	mov    -0x8(%rbp),%rax
+  200a67:	48 83 78 78 03       	cmpq   $0x3,0x78(%rax)
+  200a6c:	0f 85 11 00 00 00    	jne    200a83 <x86_64_trap_dispatch+0xe3>
+  200a72:	48 c7 c7 14 13 20 00 	mov    $0x201314,%rdi
+  200a79:	e8 02 fa ff ff       	call   200480 <log_writeln>
+  200a7e:	e9 20 00 00 00       	jmp    200aa3 <x86_64_trap_dispatch+0x103>
+  200a83:	48 8b 45 f8          	mov    -0x8(%rbp),%rax
+  200a87:	48 8b 48 78          	mov    0x78(%rax),%rcx
+  200a8b:	48 c7 c7 18 10 20 00 	mov    $0x201018,%rdi
+  200a92:	48 c7 c2 bd 12 20 00 	mov    $0x2012bd,%rdx
+  200a99:	be 65 00 00 00       	mov    $0x65,%esi
+  200a9e:	e8 bd fa ff ff       	call   200560 <kernel_panic_at>
+  200aa3:	48 83 c4 10          	add    $0x10,%rsp
+  200aa7:	5d                   	pop    %rbp
+  200aa8:	c3                   	ret
+  200aa9:	0f 1f 80 00 00 00 00 	nopl   0x0(%rax)
+
+0000000000200ab0 <trap_name>:
+  200ab0:	55                   	push   %rbp
+  200ab1:	48 89 e5             	mov    %rsp,%rbp
+  200ab4:	48 83 ec 10          	sub    $0x10,%rsp
+  200ab8:	48 89 7d f0          	mov    %rdi,-0x10(%rbp)
+  200abc:	48 83 7d f0 20       	cmpq   $0x20,-0x10(%rbp)
+  200ac1:	0f 83 18 00 00 00    	jae    200adf <trap_name+0x2f>
+  200ac7:	48 8b 45 f0          	mov    -0x10(%rbp),%rax
+  200acb:	48 8d 04 c5 00 20 20 	lea    0x202000(,%rax,8),%rax
+  200ad2:	00 
+  200ad3:	48 8b 00             	mov    (%rax),%rax
+  200ad6:	48 89 45 f8          	mov    %rax,-0x8(%rbp)
+  200ada:	e9 08 00 00 00       	jmp    200ae7 <trap_name+0x37>
+  200adf:	48 c7 45 f8 4f 12 20 	movq   $0x20124f,-0x8(%rbp)
+  200ae6:	00 
+  200ae7:	48 8b 45 f8          	mov    -0x8(%rbp),%rax
+  200aeb:	48 83 c4 10          	add    $0x10,%rsp
+  200aef:	5d                   	pop    %rbp
+  200af0:	c3                   	ret
+  200af1:	66 66 66 66 66 66 2e 	data16 data16 data16 data16 data16 cs nopw 0x0(%rax,%rax,1)
+  200af8:	0f 1f 84 00 00 00 00 
+  200aff:	00 
+
+0000000000200b00 <log_trap_frame>:
+  200b00:	55                   	push   %rbp
+  200b01:	48 89 e5             	mov    %rsp,%rbp
+  200b04:	48 83 ec 10          	sub    $0x10,%rsp
+  200b08:	48 89 7d f8          	mov    %rdi,-0x8(%rbp)
+  200b0c:	48 8b 45 f8          	mov    -0x8(%rbp),%rax
+  200b10:	48 8b 70 78          	mov    0x78(%rax),%rsi
+  200b14:	48 c7 c7 02 13 20 00 	mov    $0x201302,%rdi
+  200b1b:	e8 00 fa ff ff       	call   200520 <log_key_value_hex64>
+  200b20:	48 8b 45 f8          	mov    -0x8(%rbp),%rax
+  200b24:	48 8b b0 80 00 00 00 	mov    0x80(%rax),%rsi
+  200b2b:	48 c7 c7 62 10 20 00 	mov    $0x201062,%rdi
+  200b32:	e8 e9 f9 ff ff       	call   200520 <log_key_value_hex64>
+  200b37:	48 8b 45 f8          	mov    -0x8(%rbp),%rax
+  200b3b:	48 8b b0 88 00 00 00 	mov    0x88(%rax),%rsi
+  200b42:	48 c7 c7 86 13 20 00 	mov    $0x201386,%rdi
+  200b49:	e8 d2 f9 ff ff       	call   200520 <log_key_value_hex64>
+  200b4e:	48 8b 45 f8          	mov    -0x8(%rbp),%rax
+  200b52:	48 8b b0 90 00 00 00 	mov    0x90(%rax),%rsi
+  200b59:	48 c7 c7 9f 12 20 00 	mov    $0x20129f,%rdi
+  200b60:	e8 bb f9 ff ff       	call   200520 <log_key_value_hex64>
+  200b65:	48 8b 45 f8          	mov    -0x8(%rbp),%rax
+  200b69:	48 8b b0 98 00 00 00 	mov    0x98(%rax),%rsi
+  200b70:	48 c7 c7 a7 12 20 00 	mov    $0x2012a7,%rdi
+  200b77:	e8 a4 f9 ff ff       	call   200520 <log_key_value_hex64>
+  200b7c:	48 8b 45 f8          	mov    -0x8(%rbp),%rax
+  200b80:	48 8b 70 70          	mov    0x70(%rax),%rsi
+  200b84:	48 c7 c7 d2 11 20 00 	mov    $0x2011d2,%rdi
+  200b8b:	e8 90 f9 ff ff       	call   200520 <log_key_value_hex64>
+  200b90:	48 8b 45 f8          	mov    -0x8(%rbp),%rax
+  200b94:	48 8b 70 68          	mov    0x68(%rax),%rsi
+  200b98:	48 c7 c7 dd 11 20 00 	mov    $0x2011dd,%rdi
+  200b9f:	e8 7c f9 ff ff       	call   200520 <log_key_value_hex64>
+  200ba4:	48 8b 45 f8          	mov    -0x8(%rbp),%rax
+  200ba8:	48 8b 70 60          	mov    0x60(%rax),%rsi
+  200bac:	48 c7 c7 67 11 20 00 	mov    $0x201167,%rdi
+  200bb3:	e8 68 f9 ff ff       	call   200520 <log_key_value_hex64>
+  200bb8:	48 8b 45 f8          	mov    -0x8(%rbp),%rax
+  200bbc:	48 8b 70 58          	mov    0x58(%rax),%rsi
+  200bc0:	48 c7 c7 f2 12 20 00 	mov    $0x2012f2,%rdi
+  200bc7:	e8 54 f9 ff ff       	call   200520 <log_key_value_hex64>
+  200bcc:	48 83 c4 10          	add    $0x10,%rsp
+  200bd0:	5d                   	pop    %rbp
+  200bd1:	c3                   	ret
+  200bd2:	cc                   	int3
+  200bd3:	cc                   	int3
+  200bd4:	cc                   	int3
+  200bd5:	cc                   	int3
+  200bd6:	cc                   	int3
+  200bd7:	cc                   	int3
+  200bd8:	cc                   	int3
+  200bd9:	cc                   	int3
+  200bda:	cc                   	int3
+  200bdb:	cc                   	int3
+  200bdc:	cc                   	int3
+  200bdd:	cc                   	int3
+  200bde:	cc                   	int3
+  200bdf:	cc                   	int3
+
+0000000000200be0 <memset>:
+  200be0:	55                   	push   %rbp
+  200be1:	48 89 e5             	mov    %rsp,%rbp
+  200be4:	48 83 ec 20          	sub    $0x20,%rsp
+  200be8:	48 89 7d f8          	mov    %rdi,-0x8(%rbp)
+  200bec:	89 75 f4             	mov    %esi,-0xc(%rbp)
+  200bef:	48 89 55 e8          	mov    %rdx,-0x18(%rbp)
+  200bf3:	48 8b 45 f8          	mov    -0x8(%rbp),%rax
+  200bf7:	48 89 45 e0          	mov    %rax,-0x20(%rbp)
+  200bfb:	48 8b 45 e8          	mov    -0x18(%rbp),%rax
+  200bff:	48 89 c1             	mov    %rax,%rcx
+  200c02:	48 83 c1 ff          	add    $0xffffffffffffffff,%rcx
+  200c06:	48 89 4d e8          	mov    %rcx,-0x18(%rbp)
+  200c0a:	48 83 f8 00          	cmp    $0x0,%rax
+  200c0e:	0f 84 1b 00 00 00    	je     200c2f <memset+0x4f>
+  200c14:	8b 45 f4             	mov    -0xc(%rbp),%eax
+  200c17:	88 c1                	mov    %al,%cl
+  200c19:	48 8b 45 e0          	mov    -0x20(%rbp),%rax
+  200c1d:	48 89 c2             	mov    %rax,%rdx
+  200c20:	48 83 c2 01          	add    $0x1,%rdx
+  200c24:	48 89 55 e0          	mov    %rdx,-0x20(%rbp)
+  200c28:	88 08                	mov    %cl,(%rax)
+  200c2a:	e9 cc ff ff ff       	jmp    200bfb <memset+0x1b>
+  200c2f:	48 8b 45 f8          	mov    -0x8(%rbp),%rax
+  200c33:	48 83 c4 20          	add    $0x20,%rsp
+  200c37:	5d                   	pop    %rbp
+  200c38:	c3                   	ret
+  200c39:	0f 1f 80 00 00 00 00 	nopl   0x0(%rax)
+
+0000000000200c40 <memcpy>:
+  200c40:	55                   	push   %rbp
+  200c41:	48 89 e5             	mov    %rsp,%rbp
+  200c44:	48 83 ec 28          	sub    $0x28,%rsp
+  200c48:	48 89 7d f8          	mov    %rdi,-0x8(%rbp)
+  200c4c:	48 89 75 f0          	mov    %rsi,-0x10(%rbp)
+  200c50:	48 89 55 e8          	mov    %rdx,-0x18(%rbp)
+  200c54:	48 8b 45 f8          	mov    -0x8(%rbp),%rax
+  200c58:	48 89 45 e0          	mov    %rax,-0x20(%rbp)
+  200c5c:	48 8b 45 f0          	mov    -0x10(%rbp),%rax
+  200c60:	48 89 45 d8          	mov    %rax,-0x28(%rbp)
+  200c64:	48 8b 45 e8          	mov    -0x18(%rbp),%rax
+  200c68:	48 89 c1             	mov    %rax,%rcx
+  200c6b:	48 83 c1 ff          	add    $0xffffffffffffffff,%rcx
+  200c6f:	48 89 4d e8          	mov    %rcx,-0x18(%rbp)
+  200c73:	48 83 f8 00          	cmp    $0x0,%rax
+  200c77:	0f 84 27 00 00 00    	je     200ca4 <memcpy+0x64>
+  200c7d:	48 8b 45 d8          	mov    -0x28(%rbp),%rax
+  200c81:	48 89 c1             	mov    %rax,%rcx
+  200c84:	48 83 c1 01          	add    $0x1,%rcx
+  200c88:	48 89 4d d8          	mov    %rcx,-0x28(%rbp)
+  200c8c:	8a 08                	mov    (%rax),%cl
+  200c8e:	48 8b 45 e0          	mov    -0x20(%rbp),%rax
+  200c92:	48 89 c2             	mov    %rax,%rdx
+  200c95:	48 83 c2 01          	add    $0x1,%rdx
+  200c99:	48 89 55 e0          	mov    %rdx,-0x20(%rbp)
+  200c9d:	88 08                	mov    %cl,(%rax)
+  200c9f:	e9 c0 ff ff ff       	jmp    200c64 <memcpy+0x24>
+  200ca4:	48 8b 45 f8          	mov    -0x8(%rbp),%rax
+  200ca8:	48 83 c4 28          	add    $0x28,%rsp
+  200cac:	5d                   	pop    %rbp
+  200cad:	c3                   	ret
+  200cae:	66 90                	xchg   %ax,%ax
+
+0000000000200cb0 <strlen>:
+  200cb0:	55                   	push   %rbp
+  200cb1:	48 89 e5             	mov    %rsp,%rbp
+  200cb4:	48 83 ec 10          	sub    $0x10,%rsp
+  200cb8:	48 89 7d f8          	mov    %rdi,-0x8(%rbp)
+  200cbc:	48 c7 45 f0 00 00 00 	movq   $0x0,-0x10(%rbp)
+  200cc3:	00 
+  200cc4:	48 8b 45 f8          	mov    -0x8(%rbp),%rax
+  200cc8:	48 8b 4d f0          	mov    -0x10(%rbp),%rcx
+  200ccc:	80 3c 08 00          	cmpb   $0x0,(%rax,%rcx,1)
+  200cd0:	0f 84 11 00 00 00    	je     200ce7 <strlen+0x37>
+  200cd6:	48 8b 45 f0          	mov    -0x10(%rbp),%rax
+  200cda:	48 83 c0 01          	add    $0x1,%rax
+  200cde:	48 89 45 f0          	mov    %rax,-0x10(%rbp)
+  200ce2:	e9 dd ff ff ff       	jmp    200cc4 <strlen+0x14>
+  200ce7:	48 8b 45 f0          	mov    -0x10(%rbp),%rax
+  200ceb:	48 83 c4 10          	add    $0x10,%rsp
+  200cef:	5d                   	pop    %rbp
+  200cf0:	c3                   	ret
+  200cf1:	cc                   	int3
+  200cf2:	cc                   	int3
+  200cf3:	cc                   	int3
+  200cf4:	cc                   	int3
+  200cf5:	cc                   	int3
+  200cf6:	cc                   	int3
+  200cf7:	cc                   	int3
+  200cf8:	cc                   	int3
+  200cf9:	cc                   	int3
+  200cfa:	cc                   	int3
+  200cfb:	cc                   	int3
+  200cfc:	cc                   	int3
+  200cfd:	cc                   	int3
+  200cfe:	cc                   	int3
+  200cff:	cc                   	int3
+
+0000000000200d00 <pit_configure_hz>:
+  200d00:	55                   	push   %rbp
+  200d01:	48 89 e5             	mov    %rsp,%rbp
+  200d04:	48 83 ec 04          	sub    $0x4,%rsp
+  200d08:	89 7d fc             	mov    %edi,-0x4(%rbp)
+  200d0b:	48 83 c4 04          	add    $0x4,%rsp
+  200d0f:	5d                   	pop    %rbp
+  200d10:	c3                   	ret
+  200d11:	66 66 66 66 66 66 2e 	data16 data16 data16 data16 data16 cs nopw 0x0(%rax,%rax,1)
+  200d18:	0f 1f 84 00 00 00 00 
+  200d1f:	00 
+
+0000000000200d20 <timer_on_irq0>:
+  200d20:	55                   	push   %rbp
+  200d21:	48 89 e5             	mov    %rsp,%rbp
+  200d24:	48 8b 05 ed 32 00 00 	mov    0x32ed(%rip),%rax        # 204018 <g_ticks>
+  200d2b:	48 ff c0             	inc    %rax
+  200d2e:	48 89 05 e3 32 00 00 	mov    %rax,0x32e3(%rip)        # 204018 <g_ticks>
+  200d35:	5d                   	pop    %rbp
+  200d36:	c3                   	ret
+  200d37:	cc                   	int3
+
+0000000000200d38 <x86_64_breakpoint_stub>:
+  200d38:	48 cf                	iretq
+  200d3a:	cc                   	int3
+  200d3b:	cc                   	int3
+
+0000000000200d3c <_start>:
+  200d3c:	fa                   	cli
+  200d3d:	66 c7 04 25 00 80 0b 	movw   $0xf42,0xb8000
+  200d44:	00 42 0f 
+  200d47:	48 8d 25 d2 32 01 00 	lea    0x132d2(%rip),%rsp        # 214020 <__kernel_end>
+  200d4e:	48 83 e4 f0          	and    $0xfffffffffffffff0,%rsp
+  200d52:	e8 99 f6 ff ff       	call   2003f0 <kmain>
+  200d57:	f4                   	hlt
+  200d58:	eb fd                	jmp    200d57 <_start+0x1b>
+  200d5a:	cc                   	int3
+  200d5b:	cc                   	int3
