@@ -11,6 +11,8 @@
 #include <mcsos/kernel/panic.h>
 #include <mcsos/kmem.h>
 
+#include "mcsos_thread.h"
+
 static struct pmm_state kernel_pmm;
 
 static struct vmm_space kernel_space;
@@ -26,6 +28,22 @@ __attribute__((aligned(4096)));
 static unsigned char
 m8_boot_heap[M8_BOOT_HEAP_SIZE]
 __attribute__((aligned(4096)));
+
+/* =========================
+ * M9 Scheduler Globals
+ * ========================= */
+
+ mcsos_scheduler_t g_sched;
+
+static mcsos_thread_t g_boot_thread;
+static mcsos_thread_t g_thread_a;
+static mcsos_thread_t g_thread_b;
+
+static unsigned char g_stack_a[8192]
+__attribute__((aligned(16)));
+
+static unsigned char g_stack_b[8192]
+__attribute__((aligned(16)));
 
 static struct boot_mem_region test_regions[] = {
     { .base = 0x00000000ULL, .length = 0x0009f000ULL, .type = BOOT_MEM_USABLE },
@@ -80,6 +98,46 @@ static void *kernel_phys_to_virt(
     (void)ctx;
 
     return (void *)(uintptr_t)paddr;
+}
+
+/* =========================
+ * M9 Demo Threads
+ * ========================= */
+
+static void demo_thread_a(
+    void *arg
+)
+{
+    (void)arg;
+
+    for (;;) {
+
+        serial_write_string(
+            "[M9] thread A tick\n"
+        );
+
+        mcsos_sched_yield(
+            &g_sched
+        );
+    }
+}
+
+static void demo_thread_b(
+    void *arg
+)
+{
+    (void)arg;
+
+    for (;;) {
+
+        serial_write_string(
+            "[M9] thread B tick\n"
+        );
+
+        mcsos_sched_yield(
+            &g_sched
+        );
+    }
 }
 
 static void m8_heap_bootstrap(void)
@@ -326,6 +384,49 @@ void kmain(void)
 
     m8_heap_bootstrap();
 
+    /* =========================
+     * M9 Scheduler Init
+     * ========================= */
+
+    mcsos_scheduler_init(
+        &g_sched,
+        &g_boot_thread
+    );
+
+    mcsos_thread_prepare(
+        &g_thread_a,
+        "demo-a",
+        demo_thread_a,
+        0,
+        g_stack_a,
+        sizeof(g_stack_a),
+        g_sched.next_id++
+    );
+
+    mcsos_thread_prepare(
+        &g_thread_b,
+        "demo-b",
+        demo_thread_b,
+        0,
+        g_stack_b,
+        sizeof(g_stack_b),
+        g_sched.next_id++
+    );
+
+    mcsos_sched_enqueue(
+        &g_sched,
+        &g_thread_a
+    );
+
+    mcsos_sched_enqueue(
+        &g_sched,
+        &g_thread_b
+    );
+
+    serial_write_string(
+        "[M9] scheduler initialized\n"
+    );
+
     serial_write_string(
         "M7 ready for QEMU smoke test\n"
     );
@@ -335,6 +436,10 @@ void kmain(void)
     );
 
     cpu_sti();
+
+    mcsos_sched_yield(
+        &g_sched
+    );
 
     for (;;) {
         cpu_hlt();
