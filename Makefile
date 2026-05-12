@@ -62,6 +62,7 @@ kernel/core/panic.c \
 kernel/core/serial.c \
 kernel/core/trap.c \
 kernel/lib/memory.c \
+kernel/mm/kmem.c \
 src/pit.c \
 src/pmm.c \
 src/vmm.c
@@ -80,6 +81,7 @@ $(BUILD_DIR)/normal/kernel/core/panic.o \
 $(BUILD_DIR)/normal/kernel/core/serial.o \
 $(BUILD_DIR)/normal/kernel/core/trap.o \
 $(BUILD_DIR)/normal/kernel/lib/memory.o \
+$(BUILD_DIR)/normal/kernel/mm/kmem.o \
 $(BUILD_DIR)/normal/src/pit.o \
 $(BUILD_DIR)/normal/src/pmm.o \
 $(BUILD_DIR)/normal/src/vmm.o \
@@ -119,6 +121,10 @@ $(BUILD_DIR)/normal/kernel/core/trap.o: kernel/core/trap.c
 
 $(BUILD_DIR)/normal/kernel/lib/memory.o: kernel/lib/memory.c
 >mkdir -p $(BUILD_DIR)/normal/kernel/lib/
+>$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/normal/kernel/mm/kmem.o: kernel/mm/kmem.c
+>mkdir -p $(BUILD_DIR)/normal/kernel/mm/
 >$(CC) $(CFLAGS) -c $< -o $@
 
 $(BUILD_DIR)/normal/src/pit.o: src/pit.c
@@ -186,3 +192,34 @@ clean:
 
 distclean: clean
 >rm -rf iso_root limine evidence
+
+# =========================
+# M8 TARGETS
+# =========================
+
+CFLAGS_COMMON := -std=c17 -Wall -Wextra -Werror -Iinclude
+CFLAGS_KERNEL_M8 := $(CFLAGS_COMMON) -ffreestanding -fno-builtin -fno-stack-protector -mno-red-zone
+M8_BUILD_DIR := build/m8
+
+.PHONY: m8-clean m8-kmem-host-test m8-kmem-freestanding m8-audit m8-all
+
+m8-clean:
+>$(RM) -r $(M8_BUILD_DIR)
+
+$(M8_BUILD_DIR):
+>mkdir -p $(M8_BUILD_DIR)
+
+m8-kmem-freestanding: | $(M8_BUILD_DIR)
+>$(CC) $(CFLAGS_KERNEL_M8) -c kernel/mm/kmem.c -o $(M8_BUILD_DIR)/kmem.freestanding.o
+
+m8-kmem-host-test: | $(M8_BUILD_DIR)
+>$(CC) $(CFLAGS_COMMON) tests/test_kmem.c kernel/mm/kmem.c -o $(M8_BUILD_DIR)/test_kmem
+>./$(M8_BUILD_DIR)/test_kmem | tee $(M8_BUILD_DIR)/test_kmem.log
+
+m8-audit: m8-kmem-freestanding
+>nm -u $(M8_BUILD_DIR)/kmem.freestanding.o | tee $(M8_BUILD_DIR)/nm_u.txt
+>test ! -s $(M8_BUILD_DIR)/nm_u.txt
+>readelf -h $(M8_BUILD_DIR)/kmem.freestanding.o > $(M8_BUILD_DIR)/readelf_h.txt
+>objdump -dr $(M8_BUILD_DIR)/kmem.freestanding.o > $(M8_BUILD_DIR)/kmem.objdump.txt
+
+m8-all: m8-kmem-host-test m8-audit
