@@ -9,6 +9,7 @@
 
 #include <mcsos/arch/idt.h>
 #include <mcsos/kernel/panic.h>
+#include <mcsos/kmem.h>
 
 static struct pmm_state kernel_pmm;
 
@@ -18,6 +19,12 @@ static uint64_t hhdm_offset =
     0xFFFF800000000000ULL;
 
 static uint8_t kernel_pmm_bitmap[PMM_BITMAP_BYTES]
+__attribute__((aligned(4096)));
+
+#define M8_BOOT_HEAP_SIZE (64u * 1024u)
+
+static unsigned char
+m8_boot_heap[M8_BOOT_HEAP_SIZE]
 __attribute__((aligned(4096)));
 
 static struct boot_mem_region test_regions[] = {
@@ -73,6 +80,67 @@ static void *kernel_phys_to_virt(
     (void)ctx;
 
     return (void *)(uintptr_t)paddr;
+}
+
+static void m8_heap_bootstrap(void)
+{
+    int rc =
+        kmem_init(
+            m8_boot_heap,
+            sizeof(m8_boot_heap)
+        );
+
+    if (rc != 0) {
+
+        kernel_panic_at(
+            __FILE__,
+            __LINE__,
+            "M8: kmem_init failed",
+            (uint64_t)rc
+        );
+    }
+
+    void *probe =
+        kmem_alloc(
+            128
+        );
+
+    if (probe == 0) {
+
+        kernel_panic_at(
+            __FILE__,
+            __LINE__,
+            "M8: kmem_alloc probe failed",
+            0
+        );
+    }
+
+    rc =
+        kmem_free_checked(
+            probe
+        );
+
+    if (rc != 0) {
+
+        kernel_panic_at(
+            __FILE__,
+            __LINE__,
+            "M8: kmem_free_checked failed",
+            (uint64_t)rc
+        );
+    }
+
+    kmem_stats_t st;
+
+    kmem_get_stats(
+        &st
+    );
+
+    (void)st;
+
+    serial_write_string(
+        "[M8] kernel heap bootstrap initialized\n"
+    );
 }
 
 static void kernel_memory_init(
@@ -256,9 +324,12 @@ void kmain(void)
         "M7: VMM core initialized\n"
     );
 
-serial_write_string(
-    "M7 ready for QEMU smoke test\n"
-);
+    m8_heap_bootstrap();
+
+    serial_write_string(
+        "M7 ready for QEMU smoke test\n"
+    );
+
     serial_write_string(
         "[MCSOS:M5] sti: enabling interrupts\n"
     );
