@@ -1,8 +1,11 @@
 #include <stdint.h>
+#include <stdbool.h>
 
 #include <mcsos/arch/idt.h>
 #include <mcsos/arch/pic.h>
+
 #include "pit.h"
+#include "vmm.h"
 
 #include <mcsos/kernel/log.h>
 #include <mcsos/kernel/panic.h>
@@ -44,7 +47,8 @@ static const char *exception_names[32] = {
 
 static uint64_t trap_count;
 
-static const char *trap_name(uint64_t vector) {
+static const char *trap_name(uint64_t vector)
+{
     if (vector < 32u) {
         return exception_names[vector];
     }
@@ -52,32 +56,146 @@ static const char *trap_name(uint64_t vector) {
     return "external-or-user-defined-interrupt";
 }
 
-uint64_t m4_trap_count_for_test(void) {
+uint64_t m4_trap_count_for_test(void)
+{
     return trap_count;
 }
 
-static void log_trap_frame(const x86_64_trap_frame_t *frame) {
-    log_key_value_hex64("trap_vector", frame->vector);
-    log_key_value_hex64("trap_error", frame->error_code);
-    log_key_value_hex64("trap_rip", frame->rip);
-    log_key_value_hex64("trap_cs", frame->cs);
-    log_key_value_hex64("trap_rflags", frame->rflags);
-    log_key_value_hex64("trap_rax", frame->rax);
-    log_key_value_hex64("trap_rbx", frame->rbx);
-    log_key_value_hex64("trap_rcx", frame->rcx);
-    log_key_value_hex64("trap_rdx", frame->rdx);
+static void log_trap_frame(
+    const x86_64_trap_frame_t *frame
+)
+{
+    log_key_value_hex64(
+        "trap_vector",
+        frame->vector
+    );
+
+    log_key_value_hex64(
+        "trap_error",
+        frame->error_code
+    );
+
+    log_key_value_hex64(
+        "trap_rip",
+        frame->rip
+    );
+
+
+    log_key_value_hex64(
+        "trap_cs",
+        frame->cs
+    );
+
+    log_key_value_hex64(
+        "trap_rflags",
+        frame->rflags
+    );
+
+    log_key_value_hex64(
+        "trap_rax",
+        frame->rax
+    );
+
+    log_key_value_hex64(
+        "trap_rbx",
+        frame->rbx
+    );
+
+    log_key_value_hex64(
+        "trap_rcx",
+        frame->rcx
+    );
+
+    log_key_value_hex64(
+        "trap_rdx",
+        frame->rdx
+    );
 }
 
-void x86_64_trap_dispatch(x86_64_trap_frame_t *frame) {
+static void pf_log_bool(
+    const char *label,
+    bool value
+)
+{
+    log_write(label);
+
+    if (value) {
+        log_writeln(": true");
+    } else {
+        log_writeln(": false");
+    }
+}
+
+static void page_fault_dump(
+    uint64_t error_code,
+    const x86_64_trap_frame_t *frame
+)
+{
+    uint64_t cr2 =
+        vmm_read_cr2();
+
+    log_writeln("#PF page fault");
+
+    log_key_value_hex64(
+        "cr2",
+        cr2
+    );
+
+    log_key_value_hex64(
+        "error",
+        error_code
+    );
+
+    log_key_value_hex64(
+        "rip",
+        frame->rip
+    );
+
+    pf_log_bool(
+        "present/protection",
+        (error_code & 1ULL) != 0
+    );
+
+    pf_log_bool(
+        "write",
+        (error_code & 2ULL) != 0
+    );
+
+    pf_log_bool(
+        "user",
+        (error_code & 4ULL) != 0
+    );
+
+    pf_log_bool(
+        "reserved",
+        (error_code & 8ULL) != 0
+    );
+
+    pf_log_bool(
+        "instruction_fetch",
+        (error_code & 16ULL) != 0
+    );
+}
+
+void x86_64_trap_dispatch(
+    x86_64_trap_frame_t *frame
+)
+{
     uint8_t irq;
 
-    KERNEL_ASSERT(frame != (x86_64_trap_frame_t *)0);
+    KERNEL_ASSERT(
+        frame != (x86_64_trap_frame_t *)0
+    );
 
     ++trap_count;
 
-    if (frame->vector >= 32u && frame->vector <= 47u) {
+    if (frame->vector >= 32u &&
+        frame->vector <= 47u) {
 
-        irq = (uint8_t)(frame->vector - 32u);
+        irq =
+            (uint8_t)(
+                frame->vector - 32u
+            );
 
         if (irq == 0u) {
             timer_on_irq0();
@@ -89,14 +207,36 @@ void x86_64_trap_dispatch(x86_64_trap_frame_t *frame) {
     }
 
     log_write("[M4] trap dispatch: ");
-    log_writeln(trap_name(frame->vector));
+    log_writeln(
+        trap_name(frame->vector)
+    );
 
     log_trap_frame(frame);
 
+    if (frame->vector == 14u) {
+
+        page_fault_dump(
+            frame->error_code,
+            frame
+        );
+
+        KERNEL_PANIC(
+            "unrecoverable page fault",
+            frame->vector
+        );
+    }
+
     if (frame->vector == 3u) {
-        log_writeln("[M4] breakpoint handled; returning with iretq");
+
+        log_writeln(
+            "[M4] breakpoint handled; returning with iretq"
+        );
+
         return;
     }
 
-    KERNEL_PANIC("unrecoverable CPU exception", frame->vector);
+    KERNEL_PANIC(
+        "unrecoverable CPU exception",
+        frame->vector
+    );
 }

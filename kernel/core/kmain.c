@@ -3,14 +3,47 @@
 #include "serial.h"
 #include "pic.h"
 #include "pit.h"
+#include "vmm.h"
+
+#include <stdint.h>
 
 #include <mcsos/arch/idt.h>
 #include <mcsos/kernel/panic.h>
+#include <mcsos/kmem.h>
+
+#include "mcsos_thread.h"
 
 static struct pmm_state kernel_pmm;
 
+static struct vmm_space kernel_space;
+
+static uint64_t hhdm_offset =
+    0xFFFF800000000000ULL;
+
 static uint8_t kernel_pmm_bitmap[PMM_BITMAP_BYTES]
 __attribute__((aligned(4096)));
+
+#define M8_BOOT_HEAP_SIZE (64u * 1024u)
+
+static unsigned char
+m8_boot_heap[M8_BOOT_HEAP_SIZE]
+__attribute__((aligned(4096)));
+
+/* =========================
+ * M9 Scheduler Globals
+ * ========================= */
+
+ mcsos_scheduler_t g_sched;
+
+static mcsos_thread_t g_boot_thread;
+static mcsos_thread_t g_thread_a;
+static mcsos_thread_t g_thread_b;
+
+static unsigned char g_stack_a[8192]
+__attribute__((aligned(16)));
+
+static unsigned char g_stack_b[8192]
+__attribute__((aligned(16)));
 
 static struct boot_mem_region test_regions[] = {
     { .base = 0x00000000ULL, .length = 0x0009f000ULL, .type = BOOT_MEM_USABLE },
@@ -19,6 +52,154 @@ static struct boot_mem_region test_regions[] = {
     { .base = 0x00400000ULL, .length = 0x00100000ULL, .type = BOOT_MEM_KERNEL_AND_MODULES },
     { .base = 0x00500000ULL, .length = 0x00400000ULL, .type = BOOT_MEM_USABLE },
 };
+
+static void memzero(
+    void *ptr,
+    uint64_t size
+)
+{
+    uint8_t *p =
+        (uint8_t *)ptr;
+
+    for (uint64_t i = 0; i < size; i++) {
+        p[i] = 0;
+    }
+}
+
+static uint64_t kernel_vmm_alloc(
+    void *ctx
+)
+{
+    (void)ctx;
+
+    return pmm_alloc_frame(
+        &kernel_pmm
+    );
+}
+
+static void kernel_vmm_free(
+    void *ctx,
+    uint64_t frame_paddr
+)
+{
+    (void)ctx;
+
+    (void)pmm_free_frame(
+        &kernel_pmm,
+        frame_paddr
+    );
+}
+
+static void *kernel_phys_to_virt(
+    void *ctx,
+    uint64_t paddr
+)
+{
+    (void)ctx;
+
+    return (void *)(uintptr_t)paddr;
+}
+
+/* =========================
+ * M9 Demo Threads
+ * ========================= */
+
+static void demo_thread_a(
+    void *arg
+)
+{
+    (void)arg;
+
+    for (;;) {
+
+        serial_write_string(
+            "[M9] thread A tick\n"
+        );
+
+        mcsos_sched_yield(
+            &g_sched
+        );
+    }
+}
+
+static void demo_thread_b(
+    void *arg
+)
+{
+    (void)arg;
+
+    for (;;) {
+
+        serial_write_string(
+            "[M9] thread B tick\n"
+        );
+
+        mcsos_sched_yield(
+            &g_sched
+        );
+    }
+}
+
+static void m8_heap_bootstrap(void)
+{
+    int rc =
+        kmem_init(
+            m8_boot_heap,
+            sizeof(m8_boot_heap)
+        );
+
+    if (rc != 0) {
+
+        kernel_panic_at(
+            __FILE__,
+            __LINE__,
+            "M8: kmem_init failed",
+            (uint64_t)rc
+        );
+    }
+
+    void *probe =
+        kmem_alloc(
+            128
+        );
+
+    if (probe == 0) {
+
+        kernel_panic_at(
+            __FILE__,
+            __LINE__,
+            "M8: kmem_alloc probe failed",
+            0
+        );
+    }
+
+    rc =
+        kmem_free_checked(
+            probe
+        );
+
+    if (rc != 0) {
+
+        kernel_panic_at(
+            __FILE__,
+            __LINE__,
+            "M8: kmem_free_checked failed",
+            (uint64_t)rc
+        );
+    }
+
+    kmem_stats_t st;
+
+    kmem_get_stats(
+        &st
+    );
+
+    (void)st;
+
+    serial_write_string(
+        "[M8] kernel heap bootstrap initialized\n"
+    );
+}
 
 static void kernel_memory_init(
     const struct boot_mem_region *regions,
@@ -43,15 +224,27 @@ static void kernel_memory_init(
         );
     }
 
-    serial_write_string("[m6] pmm initialized\n");
+    serial_write_string(
+        "[m6] pmm initialized\n"
+    );
 
-    uint64_t frame_count = pmm_frame_count(&kernel_pmm);
-    uint64_t free_count = pmm_free_count(&kernel_pmm);
+    uint64_t frame_count =
+        pmm_frame_count(
+            &kernel_pmm
+        );
+
+    uint64_t free_count =
+        pmm_free_count(
+            &kernel_pmm
+        );
 
     (void)frame_count;
     (void)free_count;
 
-    uint64_t frame = pmm_alloc_frame(&kernel_pmm);
+    uint64_t frame =
+        pmm_alloc_frame(
+            &kernel_pmm
+        );
 
     if (frame == PMM_INVALID_FRAME) {
         kernel_panic_at(
@@ -62,9 +255,15 @@ static void kernel_memory_init(
         );
     }
 
-    serial_write_string("[m6] frame allocated\n");
+    serial_write_string(
+        "[m6] frame allocated\n"
+    );
 
-    if (!pmm_free_frame(&kernel_pmm, frame)) {
+    if (!pmm_free_frame(
+            &kernel_pmm,
+            frame
+        )) {
+
         kernel_panic_at(
             __FILE__,
             __LINE__,
@@ -73,7 +272,9 @@ static void kernel_memory_init(
         );
     }
 
-    serial_write_string("[m6] frame freed\n");
+    serial_write_string(
+        "[m6] frame freed\n"
+    );
 }
 
 void kmain(void)
@@ -92,16 +293,24 @@ void kmain(void)
         "[MCSOS:M5] idt: loaded\n"
     );
 
-    pic_remap(0x20u, 0x28u);
+    pic_remap(
+        0x20u,
+        0x28u
+    );
 
     pic_mask_all();
-    pic_unmask_irq(0);
+
+    pic_unmask_irq(
+        0
+    );
 
     serial_write_string(
         "[MCSOS:M5] pic: remapped, IRQ0 unmasked\n"
     );
 
-    pit_configure_hz(100);
+    pit_configure_hz(
+        100
+    );
 
     serial_write_string(
         "[MCSOS:M5] pit: configured 100Hz\n"
@@ -109,7 +318,117 @@ void kmain(void)
 
     kernel_memory_init(
         test_regions,
-        sizeof(test_regions) / sizeof(test_regions[0])
+        sizeof(test_regions) /
+        sizeof(test_regions[0])
+    );
+
+    uint64_t root =
+        pmm_alloc_frame(
+            &kernel_pmm
+        );
+
+    if (root == PMM_INVALID_FRAME) {
+
+        kernel_panic_at(
+            __FILE__,
+            __LINE__,
+            "M7: cannot allocate root page table",
+            0
+        );
+    }
+
+    void *root_virt =
+        kernel_phys_to_virt(
+            &hhdm_offset,
+            root
+        );
+
+    if (root_virt == 0) {
+
+        kernel_panic_at(
+            __FILE__,
+            __LINE__,
+            "M7: invalid root virtual address",
+            0
+        );
+    }
+
+    memzero(
+        root_virt,
+        VMM_PAGE_SIZE
+    );
+
+    int rc =
+        vmm_space_init(
+            &kernel_space,
+            root,
+            &hhdm_offset,
+            kernel_vmm_alloc,
+            kernel_vmm_free,
+            kernel_phys_to_virt
+        );
+
+    if (rc != VMM_MAP_OK) {
+
+        kernel_panic_at(
+            __FILE__,
+            __LINE__,
+            "M7: vmm_space_init failed",
+            0
+        );
+    }
+
+    serial_write_string(
+        "M7: VMM core initialized\n"
+    );
+
+    m8_heap_bootstrap();
+
+    /* =========================
+     * M9 Scheduler Init
+     * ========================= */
+
+    mcsos_scheduler_init(
+        &g_sched,
+        &g_boot_thread
+    );
+
+    mcsos_thread_prepare(
+        &g_thread_a,
+        "demo-a",
+        demo_thread_a,
+        0,
+        g_stack_a,
+        sizeof(g_stack_a),
+        g_sched.next_id++
+    );
+
+    mcsos_thread_prepare(
+        &g_thread_b,
+        "demo-b",
+        demo_thread_b,
+        0,
+        g_stack_b,
+        sizeof(g_stack_b),
+        g_sched.next_id++
+    );
+
+    mcsos_sched_enqueue(
+        &g_sched,
+        &g_thread_a
+    );
+
+    mcsos_sched_enqueue(
+        &g_sched,
+        &g_thread_b
+    );
+
+    serial_write_string(
+        "[M9] scheduler initialized\n"
+    );
+
+    serial_write_string(
+        "M7 ready for QEMU smoke test\n"
     );
 
     serial_write_string(
@@ -117,6 +436,10 @@ void kmain(void)
     );
 
     cpu_sti();
+
+    mcsos_sched_yield(
+        &g_sched
+    );
 
     for (;;) {
         cpu_hlt();
