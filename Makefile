@@ -66,13 +66,15 @@ kernel/mm/kmem.c \
 kernel/mcsos_thread.c \
 src/pit.c \
 src/pmm.c \
-src/vmm.c
+src/vmm.c \
+kernel/syscall/syscall.c
 
 SRCS_S := \
 kernel/arch/x86_64/isr.S \
 kernel/boot/boot.S \
 kernel/boot/multiboot2_header.S \
-arch/x86_64/context_switch.S
+arch/x86_64/context_switch.S \
+kernel/syscall/syscall_entry.S
 
 OBJS := \
 $(BUILD_DIR)/normal/kernel/arch/x86_64/idt.o \
@@ -88,10 +90,12 @@ $(BUILD_DIR)/normal/kernel/mcsos_thread.o \
 $(BUILD_DIR)/normal/src/pit.o \
 $(BUILD_DIR)/normal/src/pmm.o \
 $(BUILD_DIR)/normal/src/vmm.o \
+$(BUILD_DIR)/normal/kernel/syscall/syscall.o \
 $(BUILD_DIR)/normal/kernel/arch/x86_64/isr.o \
 $(BUILD_DIR)/normal/kernel/boot/boot.o \
 $(BUILD_DIR)/normal/kernel/boot/multiboot2_header.o \
-$(BUILD_DIR)/normal/arch/x86_64/context_switch.o
+$(BUILD_DIR)/normal/arch/x86_64/context_switch.o \
+$(BUILD_DIR)/normal/kernel/syscall/syscall_entry.o
 
 all: $(BUILD_DIR)/kernel.elf
 
@@ -146,6 +150,9 @@ $(BUILD_DIR)/normal/src/pmm.o: src/pmm.c
 $(BUILD_DIR)/normal/src/vmm.o: src/vmm.c
 >mkdir -p $(BUILD_DIR)/normal/src/
 >$(CC) $(CFLAGS) -c $< -o $@
+$(BUILD_DIR)/normal/kernel/syscall/syscall.o: kernel/syscall/syscall.c
+>mkdir -p $(BUILD_DIR)/normal/kernel/syscall/
+>$(CC) $(CFLAGS) -c $< -o $@
 
 $(BUILD_DIR)/normal/kernel/arch/x86_64/isr.o: kernel/arch/x86_64/isr.S
 >mkdir -p $(BUILD_DIR)/normal/kernel/arch/x86_64/
@@ -161,6 +168,9 @@ $(BUILD_DIR)/normal/kernel/boot/multiboot2_header.o: kernel/boot/multiboot2_head
 
 $(BUILD_DIR)/normal/arch/x86_64/context_switch.o: arch/x86_64/context_switch.S
 >mkdir -p $(BUILD_DIR)/normal/arch/x86_64/
+>$(CC) $(ASFLAGS) -c $< -o $@
+$(BUILD_DIR)/normal/kernel/syscall/syscall_entry.o: kernel/syscall/syscall_entry.S
+>mkdir -p $(BUILD_DIR)/normal/kernel/syscall/
 >$(CC) $(ASFLAGS) -c $< -o $@
 
 $(BUILD_DIR)/kernel.elf: $(OBJS)
@@ -183,7 +193,7 @@ iso: $(BUILD_DIR)/kernel.elf
 >mkdir -p $(BUILD_DIR)/iso/boot/grub
 >cp $(BUILD_DIR)/kernel.elf $(BUILD_DIR)/iso/boot/kernel.elf
 >cp iso/boot/grub/grub.cfg $(BUILD_DIR)/iso/boot/grub/grub.cfg
->grub-mkrescue -o $(BUILD_DIR)/mcsos.iso $(BUILD_DIR)/iso
+>grub-mkrescue -o $(BUILD_DIR)/mcsos.iso $(BUILD_DIR)/iso --modules="multiboot2 normal iso9660 biosdisk"
 
 run: iso
 >qemu-system-x86_64 \

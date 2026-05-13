@@ -9,6 +9,7 @@
 
 #include <mcsos/arch/idt.h>
 #include <mcsos/kernel/panic.h>
+#include "mcsos/syscall.h"
 #include <mcsos/kmem.h>
 
 #include "mcsos_thread.h"
@@ -275,8 +276,33 @@ static void kernel_memory_init(
     serial_write_string(
         "[m6] frame freed\n"
     );
+
 }
 
+static int64_t k_write_serial_bounded(const char *buf, size_t len) {
+    for (size_t i = 0; i < len; ++i) serial_write_char(buf[i]);
+    return (int64_t)len;
+}
+static uint64_t k_get_ticks(void) { return timer_ticks(); }
+static void k_yield_current(void) { mcsos_sched_yield(&g_sched); }
+static void k_exit_current(int code) {
+    (void)code;
+    serial_write_string("[M10] exit_thread called (stub)\n");
+}
+static void m10_syscall_smoke_direct(void) {
+    int64_t r = mcsos_syscall_dispatch(MCSOS_SYS_PING, 0, 0, 0, 0, 0, 0);
+    if (r != 0x2605020AL) {
+        KERNEL_PANIC("M10 syscall ping failed", 0);
+    }
+    serial_write_string("[M10] syscall ping ok\n");
+    int64_t t = mcsos_syscall_dispatch(MCSOS_SYS_GET_TICKS, 0, 0, 0, 0, 0, 0);
+    if (t < 0) {
+        serial_write_string("[M10] get_ticks returned EBUSY (timer not ready)\n");
+    } else {
+        serial_write_string("[M10] syscall get_ticks ok\n");
+    }
+    serial_write_string("[M10] syscall smoke done\n");
+}
 void kmain(void)
 {
     cpu_cli();
@@ -427,6 +453,28 @@ void kmain(void)
         "[M9] scheduler initialized\n"
     );
 
+    {
+        mcsos_syscall_ops_t m10_ops;
+        m10_ops.get_ticks     = k_get_ticks;
+        m10_ops.yield_current = k_yield_current;
+        m10_ops.exit_current  = k_exit_current;
+        m10_ops.write_serial  = k_write_serial_bounded;
+        mcsos_syscall_init(&m10_ops);
+        mcsos_syscall_set_user_region(
+            (mcsos_user_region_t){0x0000000000400000ULL, 0x0000800000000000ULL}
+        );
+        serial_write_string("[M10] syscall dispatcher initialized\n");
+    }
+    {
+        extern void x86_64_syscall_int80_stub(void);
+        x86_64_idt_set_gate(
+            0x80,
+            (uint64_t)x86_64_syscall_int80_stub,
+            X86_64_IDT_GATE_INTERRUPT
+        );
+        serial_write_string("[M10] IDT vector 0x80 installed\n");
+    }
+    m10_syscall_smoke_direct();
     serial_write_string(
         "M7 ready for QEMU smoke test\n"
     );
