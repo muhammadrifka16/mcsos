@@ -1,4 +1,4 @@
-.section .multiboot2
+.section .multiboot2, "a"
 .align 8
 
 header_start:
