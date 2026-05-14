@@ -29,7 +29,8 @@ CFLAGS := \
 -Werror \
 -Ikernel/arch/x86_64/include \
 -Ikernel/include \
--Iinclude
+-Iinclude \
+-Iinclude/mcsos/user
 
 ASFLAGS := \
 --target=x86_64-unknown-none-elf \
@@ -67,7 +68,8 @@ kernel/mcsos_thread.c \
 src/pit.c \
 src/pmm.c \
 src/vmm.c \
-kernel/syscall/syscall.c
+kernel/syscall/syscall.c \
+kernel/user/m11_elf_loader.c \
 
 SRCS_S := \
 kernel/arch/x86_64/isr.S \
@@ -95,7 +97,8 @@ $(BUILD_DIR)/normal/kernel/arch/x86_64/isr.o \
 $(BUILD_DIR)/normal/kernel/boot/boot.o \
 $(BUILD_DIR)/normal/kernel/boot/multiboot2_header.o \
 $(BUILD_DIR)/normal/arch/x86_64/context_switch.o \
-$(BUILD_DIR)/normal/kernel/syscall/syscall_entry.o
+$(BUILD_DIR)/normal/kernel/syscall/syscall_entry.o \
+$(BUILD_DIR)/normal/kernel/user/m11_elf_loader.o
 
 all: $(BUILD_DIR)/kernel.elf
 
@@ -153,6 +156,10 @@ $(BUILD_DIR)/normal/src/vmm.o: src/vmm.c
 
 $(BUILD_DIR)/normal/kernel/syscall/syscall.o: kernel/syscall/syscall.c
 >mkdir -p $(BUILD_DIR)/normal/kernel/syscall/
+>$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/normal/kernel/user/m11_elf_loader.o: kernel/user/m11_elf_loader.c
+>mkdir -p $(BUILD_DIR)/normal/kernel/user/
 >$(CC) $(CFLAGS) -c $< -o $@
 
 $(BUILD_DIR)/normal/kernel/arch/x86_64/isr.o: kernel/arch/x86_64/isr.S
@@ -337,6 +344,7 @@ M11_LOADER_C := kernel/user/m11_elf_loader.c
 M11_TEST_C   := tests/m11/m11_host_test.c
 
 CFLAGS_HOST_M11 := \
+-DM11_HOST_TEST \
 -std=c17 \
 -Wall \
 -Wextra \
@@ -380,25 +388,41 @@ m11-host-test: | $(M11_BUILD_DIR)
 >$(M11_LOADER_C) \
 >$(M11_TEST_C) \
 >-o $(M11_BUILD_DIR)/m11_host_test
->./$(M11_BUILD_DIR)/m11_host_test | tee $(M11_BUILD_DIR)/m11_host_test.log
+
+>./$(M11_BUILD_DIR)/m11_host_test \
+>| tee $(M11_BUILD_DIR)/m11_host_test.log
 
 m11-freestanding: | $(M11_BUILD_DIR)
 >$(CC) $(CFLAGS_KERNEL_M11) \
 >-c $(M11_LOADER_C) \
->-o $(M11_BUILD_DIR)/m11_elf_loader.o 2>&1 | tee $(M11_BUILD_DIR)/m11_freestanding.log
+>-o $(M11_BUILD_DIR)/m11_elf_loader.o \
+>2>&1 | tee $(M11_BUILD_DIR)/m11_freestanding.log
 
 m11-audit: m11-freestanding
->$(NM) -u $(M11_BUILD_DIR)/m11_elf_loader.o | tee $(M11_BUILD_DIR)/m11_nm_undefined.txt
+>$(NM) -u $(M11_BUILD_DIR)/m11_elf_loader.o \
+>| tee $(M11_BUILD_DIR)/m11_nm_undefined.txt
+
 >test ! -s $(M11_BUILD_DIR)/m11_nm_undefined.txt
->$(READELF) -h $(M11_BUILD_DIR)/m11_elf_loader.o > $(M11_BUILD_DIR)/m11_readelf_header.txt
->$(OBJDUMP) -dr $(M11_BUILD_DIR)/m11_elf_loader.o > $(M11_BUILD_DIR)/m11_objdump.txt
+
+>$(READELF) -h $(M11_BUILD_DIR)/m11_elf_loader.o \
+>> $(M11_BUILD_DIR)/m11_readelf_header.txt
+
+>$(OBJDUMP) -dr $(M11_BUILD_DIR)/m11_elf_loader.o \
+>> $(M11_BUILD_DIR)/m11_objdump.txt
+
 >sha256sum \
 >$(M11_BUILD_DIR)/m11_elf_loader.o \
 >$(M11_LOADER_C) \
 >$(M11_HEADER) \
 >$(M11_TEST_C) \
 >> $(M11_BUILD_DIR)/m11_sha256.txt
->grep -q 'ELF64' $(M11_BUILD_DIR)/m11_readelf_header.txt
->grep -q 'm11_elf64_plan_load' $(M11_BUILD_DIR)/m11_objdump.txt
+
+>grep -q 'ELF64' \
+>$(M11_BUILD_DIR)/m11_readelf_header.txt
+
+>grep -q 'm11_elf64_plan_load' \
+>$(M11_BUILD_DIR)/m11_objdump.txt
+
 >@echo "[OK] M11 audit selesai"
+
 >@cat $(M11_BUILD_DIR)/m11_sha256.txt
