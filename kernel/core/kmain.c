@@ -11,6 +11,7 @@
 #include <mcsos/kernel/panic.h>
 #include "mcsos/syscall.h"
 #include <mcsos/kmem.h>
+#include <kernel/user/m11_kernel_integration.h>
 
 #include "mcsos_thread.h"
 
@@ -475,6 +476,7 @@ void kmain(void)
         serial_write_string("[M10] IDT vector 0x80 installed\n");
     }
     m10_syscall_smoke_direct();
+	m11_kernel_integration_test();
     serial_write_string(
         "M7 ready for QEMU smoke test\n"
     );
