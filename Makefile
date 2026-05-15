@@ -70,6 +70,7 @@ src/pmm.c \
 src/vmm.c \
 kernel/syscall/syscall.c \
 kernel/user/m11_elf_loader.c \
+kernel/user/m11_kernel_integration.c \
 
 SRCS_S := \
 kernel/arch/x86_64/isr.S \
@@ -98,7 +99,8 @@ $(BUILD_DIR)/normal/kernel/boot/boot.o \
 $(BUILD_DIR)/normal/kernel/boot/multiboot2_header.o \
 $(BUILD_DIR)/normal/arch/x86_64/context_switch.o \
 $(BUILD_DIR)/normal/kernel/syscall/syscall_entry.o \
-$(BUILD_DIR)/normal/kernel/user/m11_elf_loader.o
+$(BUILD_DIR)/normal/kernel/user/m11_elf_loader.o \
+$(BUILD_DIR)/normal/kernel/user/m11_kernel_integration.o \
 
 all: $(BUILD_DIR)/kernel.elf
 
@@ -159,6 +161,10 @@ $(BUILD_DIR)/normal/kernel/syscall/syscall.o: kernel/syscall/syscall.c
 >$(CC) $(CFLAGS) -c $< -o $@
 
 $(BUILD_DIR)/normal/kernel/user/m11_elf_loader.o: kernel/user/m11_elf_loader.c
+>mkdir -p $(BUILD_DIR)/normal/kernel/user/
+>$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/normal/kernel/user/m11_kernel_integration.o: kernel/user/m11_kernel_integration.c
 >mkdir -p $(BUILD_DIR)/normal/kernel/user/
 >$(CC) $(CFLAGS) -c $< -o $@
 
