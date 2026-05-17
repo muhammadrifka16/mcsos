@@ -71,6 +71,10 @@ src/vmm.c \
 kernel/syscall/syscall.c \
 kernel/user/m11_elf_loader.c \
 kernel/user/m11_kernel_integration.c \
+kernel/sync/lockdep.c \
+kernel/sync/spinlock.c \
+kernel/sync/mutex.c \
+kernel/sync/selftest.c \
 
 SRCS_S := \
 kernel/arch/x86_64/isr.S \
@@ -101,6 +105,10 @@ $(BUILD_DIR)/normal/arch/x86_64/context_switch.o \
 $(BUILD_DIR)/normal/kernel/syscall/syscall_entry.o \
 $(BUILD_DIR)/normal/kernel/user/m11_elf_loader.o \
 $(BUILD_DIR)/normal/kernel/user/m11_kernel_integration.o \
+$(BUILD_DIR)/normal/kernel/sync/lockdep.o \
+$(BUILD_DIR)/normal/kernel/sync/spinlock.o \
+$(BUILD_DIR)/normal/kernel/sync/mutex.o \
+$(BUILD_DIR)/normal/kernel/sync/selftest.o \
 
 all: $(BUILD_DIR)/kernel.elf
 
@@ -187,6 +195,22 @@ $(BUILD_DIR)/normal/arch/x86_64/context_switch.o: arch/x86_64/context_switch.S
 $(BUILD_DIR)/normal/kernel/syscall/syscall_entry.o: kernel/syscall/syscall_entry.S
 >mkdir -p $(BUILD_DIR)/normal/kernel/syscall/
 >$(CC) $(ASFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/normal/kernel/sync/lockdep.o: kernel/sync/lockdep.c
+>mkdir -p $(BUILD_DIR)/normal/kernel/sync/
+>$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/normal/kernel/sync/spinlock.o: kernel/sync/spinlock.c
+>mkdir -p $(BUILD_DIR)/normal/kernel/sync/
+>$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/normal/kernel/sync/mutex.o: kernel/sync/mutex.c
+>mkdir -p $(BUILD_DIR)/normal/kernel/sync/
+>$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/normal/kernel/sync/selftest.o: kernel/sync/selftest.c
+>mkdir -p $(BUILD_DIR)/normal/kernel/sync/
+>$(CC) $(CFLAGS) -c $< -o $@
 
 $(BUILD_DIR)/kernel.elf: $(OBJS)
 >mkdir -p $(BUILD_DIR)
