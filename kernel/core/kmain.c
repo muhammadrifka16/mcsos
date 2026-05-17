@@ -4,6 +4,7 @@
 #include "pic.h"
 #include "pit.h"
 #include "vmm.h"
+#include "mcs_sync.h"
 
 #include <stdint.h>
 
@@ -410,6 +411,8 @@ void kmain(void)
     );
 
     m8_heap_bootstrap();
+
+    m12_sync_selftest();
 
     /* =========================
      * M9 Scheduler Init
