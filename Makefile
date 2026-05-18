@@ -65,6 +65,9 @@ kernel/core/trap.c \
 kernel/lib/memory.c \
 kernel/mm/kmem.c \
 kernel/mcsos_thread.c \
+kernel/vfs/ramfs.c \
+kernel/vfs/fd.c \
+kernel/vfs/sys_vfs.c \
 src/pit.c \
 src/pmm.c \
 src/vmm.c \
@@ -94,6 +97,9 @@ $(BUILD_DIR)/normal/kernel/core/trap.o \
 $(BUILD_DIR)/normal/kernel/lib/memory.o \
 $(BUILD_DIR)/normal/kernel/mm/kmem.o \
 $(BUILD_DIR)/normal/kernel/mcsos_thread.o \
+$(BUILD_DIR)/normal/kernel/vfs/ramfs.o \
+$(BUILD_DIR)/normal/kernel/vfs/fd.o \
+$(BUILD_DIR)/normal/kernel/vfs/sys_vfs.o \
 $(BUILD_DIR)/normal/src/pit.o \
 $(BUILD_DIR)/normal/src/pmm.o \
 $(BUILD_DIR)/normal/src/vmm.o \
@@ -150,6 +156,18 @@ $(BUILD_DIR)/normal/kernel/mm/kmem.o: kernel/mm/kmem.c
 
 $(BUILD_DIR)/normal/kernel/mcsos_thread.o: kernel/mcsos_thread.c
 >mkdir -p $(BUILD_DIR)/normal/kernel/
+>$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/normal/kernel/vfs/ramfs.o: kernel/vfs/ramfs.c
+>mkdir -p $(BUILD_DIR)/normal/kernel/vfs/
+>$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/normal/kernel/vfs/fd.o: kernel/vfs/fd.c
+>mkdir -p $(BUILD_DIR)/normal/kernel/vfs/
+>$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/normal/kernel/vfs/sys_vfs.o: kernel/vfs/sys_vfs.c
+>mkdir -p $(BUILD_DIR)/normal/kernel/vfs/
 >$(CC) $(CFLAGS) -c $< -o $@
 
 $(BUILD_DIR)/normal/src/pit.o: src/pit.c

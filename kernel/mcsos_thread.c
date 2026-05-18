@@ -1,4 +1,5 @@
 #include "mcsos_thread.h"
+#include "mcs_vfs.h"
 
 #if !defined(MCSOS_HOST_TEST)
 /* g_sched didefinisikan di kmain.c */
@@ -240,6 +241,10 @@ int mcsos_thread_prepare(
     thread->switches = 0;
     thread->ticks = 0;
     thread->exit_code = 0;
+    mcs_fd_table_init(
+        &thread->fd_table
+
+    );
 
     return MCSOS_SCHED_OK;
 }
