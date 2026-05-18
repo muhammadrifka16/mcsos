@@ -15,6 +15,7 @@
 #include <kernel/user/m11_kernel_integration.h>
 
 #include "mcsos_thread.h"
+#include "mcs_vfs.h"
 
 static struct pmm_state kernel_pmm;
 
@@ -41,6 +42,8 @@ __attribute__((aligned(4096)));
 static mcsos_thread_t g_boot_thread;
 static mcsos_thread_t g_thread_a;
 static mcsos_thread_t g_thread_b;
+
+static mcs_ramfs_t g_kernel_ramfs;
 
 static unsigned char g_stack_a[8192]
 __attribute__((aligned(16)));
@@ -480,7 +483,56 @@ void kmain(void)
     }
     m10_syscall_smoke_direct();
 	m11_kernel_integration_test();
+        mcs_ramfs_init(
+        &g_kernel_ramfs
+    );
+
+    mcs_ramfs_seed_file(
+        &g_kernel_ramfs,
+        "/hello.txt",
+        (const uint8_t *)"hello-from-m13",
+        15u
+    );
+
     serial_write_string(
+        "[M13] RAMFS initialized\n"
+    ); 
+    {
+        mcs_fd_table_t table;
+        char buf[16];
+        int fd;
+
+        mcs_fd_table_init(
+            &table
+        );
+
+        fd = mcs_vfs_open(
+            &table,
+            &g_kernel_ramfs,
+            "/hello.txt",
+            MCS_O_RDONLY
+        );
+
+        if (fd >= 0) {
+
+            mcs_vfs_read(
+                &table,
+                fd,
+                buf,
+                5u
+            );
+
+            mcs_vfs_close(
+                &table,
+                fd
+            );
+
+            serial_write_string(
+                "[M13] VFS runtime selftest OK\n"
+            );
+        }
+    }
+   serial_write_string(
         "M7 ready for QEMU smoke test\n"
     );
 

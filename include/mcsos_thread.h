@@ -4,6 +4,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "mcs_vfs.h"
+
 #define MCSOS_THREAD_MAGIC UINT64_C(0x4d43534f53544852)
 #define MCSOS_THREAD_NAME_MAX 32u
 #define MCSOS_STACK_ALIGN 16u
@@ -52,6 +54,7 @@ typedef struct mcsos_thread {
     uint64_t switches;
     uint64_t ticks;
     int exit_code;
+    mcs_fd_table_t fd_table;
 } mcsos_thread_t;
 
 typedef struct mcsos_scheduler {
