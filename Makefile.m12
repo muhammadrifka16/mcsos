@@ -1,5 +1,5 @@
-CC ?= clang
-HOSTCC ?= cc
+CC = clang
+HOSTCC = cc
 NM ?= nm
 READELF ?= readelf
 OBJDUMP ?= objdump
