@@ -68,6 +68,9 @@ kernel/mcsos_thread.c \
 kernel/vfs/ramfs.c \
 kernel/vfs/fd.c \
 kernel/vfs/sys_vfs.c \
+kernel/block/block.c \
+kernel/block/ramblk.c \
+kernel/block/bcache.c \
 src/pit.c \
 src/pmm.c \
 src/vmm.c \
@@ -100,6 +103,9 @@ $(BUILD_DIR)/normal/kernel/mcsos_thread.o \
 $(BUILD_DIR)/normal/kernel/vfs/ramfs.o \
 $(BUILD_DIR)/normal/kernel/vfs/fd.o \
 $(BUILD_DIR)/normal/kernel/vfs/sys_vfs.o \
+$(BUILD_DIR)/normal/kernel/block/block.o \
+$(BUILD_DIR)/normal/kernel/block/ramblk.o \
+$(BUILD_DIR)/normal/kernel/block/bcache.o \
 $(BUILD_DIR)/normal/src/pit.o \
 $(BUILD_DIR)/normal/src/pmm.o \
 $(BUILD_DIR)/normal/src/vmm.o \
@@ -168,6 +174,19 @@ $(BUILD_DIR)/normal/kernel/vfs/fd.o: kernel/vfs/fd.c
 
 $(BUILD_DIR)/normal/kernel/vfs/sys_vfs.o: kernel/vfs/sys_vfs.c
 >mkdir -p $(BUILD_DIR)/normal/kernel/vfs/
+>$(CC) $(CFLAGS) -c $< -o $@
+
+
+$(BUILD_DIR)/normal/kernel/block/block.o: kernel/block/block.c
+>mkdir -p $(BUILD_DIR)/normal/kernel/block/
+>$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/normal/kernel/block/ramblk.o: kernel/block/ramblk.c
+>mkdir -p $(BUILD_DIR)/normal/kernel/block/
+>$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/normal/kernel/block/bcache.o: kernel/block/bcache.c
+>mkdir -p $(BUILD_DIR)/normal/kernel/block/
 >$(CC) $(CFLAGS) -c $< -o $@
 
 $(BUILD_DIR)/normal/src/pit.o: src/pit.c
@@ -474,3 +493,100 @@ m11-audit: m11-freestanding
 >@echo "[OK] M11 audit selesai"
 
 >@cat $(M11_BUILD_DIR)/m11_sha256.txt
+
+
+# =========================
+# M14 TARGETS
+# =========================
+
+M14_BUILD_DIR := build/m14
+
+M14_HEADER := include/mcsos/block.h
+
+M14_SRC := \
+kernel/block/block.c \
+kernel/block/ramblk.c \
+kernel/block/bcache.c
+
+M14_TEST := tests/host/test_m14_block.c
+
+CFLAGS_HOST_M14 := \
+-std=c17 \
+-Wall \
+-Wextra \
+-Werror \
+-O2 \
+-Iinclude
+
+CFLAGS_KERNEL_M14 := \
+--target=x86_64-unknown-none-elf \
+-std=c17 \
+-ffreestanding \
+-fno-builtin \
+-fno-stack-protector \
+-fno-pic \
+-mno-red-zone \
+-Wall \
+-Wextra \
+-Werror \
+-O2 \
+-Iinclude
+
+.PHONY: m14-all m14-host-test m14-freestanding m14-audit m14-clean
+
+m14-all: m14-host-test m14-freestanding m14-audit
+
+m14-clean:
+>rm -rf $(M14_BUILD_DIR)
+
+$(M14_BUILD_DIR):
+>mkdir -p $(M14_BUILD_DIR)
+
+m14-host-test: | $(M14_BUILD_DIR)
+>$(CC) $(CFLAGS_HOST_M14) \
+>$(M14_TEST) \
+>$(M14_SRC) \
+>-o $(M14_BUILD_DIR)/m14_host_test
+
+>./$(M14_BUILD_DIR)/m14_host_test \
+>| tee $(M14_BUILD_DIR)/m14_host_test.log
+
+m14-freestanding: | $(M14_BUILD_DIR)
+>$(CC) $(CFLAGS_KERNEL_M14) \
+>-c kernel/block/block.c \
+>-o $(M14_BUILD_DIR)/block.o
+
+>$(CC) $(CFLAGS_KERNEL_M14) \
+>-c kernel/block/ramblk.c \
+>-o $(M14_BUILD_DIR)/ramblk.o
+
+>$(CC) $(CFLAGS_KERNEL_M14) \
+>-c kernel/block/bcache.c \
+>-o $(M14_BUILD_DIR)/bcache.o
+
+>$(LD) -r \
+>$(M14_BUILD_DIR)/block.o \
+>$(M14_BUILD_DIR)/ramblk.o \
+>$(M14_BUILD_DIR)/bcache.o \
+>-o $(M14_BUILD_DIR)/m14_block_layer.o
+
+m14-audit: m14-freestanding
+>$(NM) -u $(M14_BUILD_DIR)/m14_block_layer.o \
+>| tee $(M14_BUILD_DIR)/m14_nm_undefined.txt
+
+>test ! -s $(M14_BUILD_DIR)/m14_nm_undefined.txt
+
+>$(READELF) -h $(M14_BUILD_DIR)/m14_block_layer.o \
+>> $(M14_BUILD_DIR)/m14_readelf_block.txt
+
+>$(OBJDUMP) -dr $(M14_BUILD_DIR)/m14_block_layer.o \
+>> $(M14_BUILD_DIR)/m14_objdump_block.txt
+
+>sha256sum \
+>$(M14_BUILD_DIR)/block.o \
+>$(M14_BUILD_DIR)/ramblk.o \
+>$(M14_BUILD_DIR)/bcache.o \
+>$(M14_BUILD_DIR)/m14_block_layer.o \
+>> $(M14_BUILD_DIR)/m14_sha256.txt
+
+>@echo "[OK] M14 audit selesai"

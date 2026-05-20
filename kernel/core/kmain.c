@@ -13,6 +13,8 @@
 #include "mcsos/syscall.h"
 #include <mcsos/kmem.h>
 #include <kernel/user/m11_kernel_integration.h>
+#include <mcsos/block.h>
+#include <stdint.h>
 
 #include "mcsos_thread.h"
 #include "mcs_vfs.h"
@@ -462,28 +464,47 @@ void kmain(void)
 
     {
         mcsos_syscall_ops_t m10_ops;
+
         m10_ops.get_ticks     = k_get_ticks;
         m10_ops.yield_current = k_yield_current;
         m10_ops.exit_current  = k_exit_current;
         m10_ops.write_serial  = k_write_serial_bounded;
-        mcsos_syscall_init(&m10_ops);
-        mcsos_syscall_set_user_region(
-            (mcsos_user_region_t){0x0000000000400000ULL, 0x0000800000000000ULL}
+
+        mcsos_syscall_init(
+            &m10_ops
         );
-        serial_write_string("[M10] syscall dispatcher initialized\n");
+
+        mcsos_syscall_set_user_region(
+            (mcsos_user_region_t){
+                0x0000000000400000ULL,
+                0x0000800000000000ULL
+            }
+        );
+
+        serial_write_string(
+            "[M10] syscall dispatcher initialized\n"
+        );
     }
+
     {
         extern void x86_64_syscall_int80_stub(void);
+
         x86_64_idt_set_gate(
             0x80,
             (uint64_t)x86_64_syscall_int80_stub,
             X86_64_IDT_GATE_INTERRUPT
         );
-        serial_write_string("[M10] IDT vector 0x80 installed\n");
+
+        serial_write_string(
+            "[M10] IDT vector 0x80 installed\n"
+        );
     }
+
     m10_syscall_smoke_direct();
-	m11_kernel_integration_test();
-        mcs_ramfs_init(
+
+    m11_kernel_integration_test();
+
+    mcs_ramfs_init(
         &g_kernel_ramfs
     );
 
@@ -496,7 +517,8 @@ void kmain(void)
 
     serial_write_string(
         "[M13] RAMFS initialized\n"
-    ); 
+    );
+
     {
         mcs_fd_table_t table;
         char buf[16];
@@ -532,8 +554,38 @@ void kmain(void)
             );
         }
     }
-   serial_write_string(
+
+    serial_write_string(
         "M7 ready for QEMU smoke test\n"
+    );
+
+    static uint8_t ramdisk_mem[512 * 16];
+
+    static struct mcsos_blk_device ram0 = {
+        .name = "ram0",
+        .block_size = 512,
+        .block_count = 16,
+        .driver_data = ramdisk_mem,
+    };
+
+    mcsos_blk_register(
+        &ram0
+    );
+
+    uint8_t tmp[512];
+
+    mcsos_blk_read(
+        &ram0,
+        0,
+        1,
+        tmp
+    );
+
+    mcsos_blk_write(
+        &ram0,
+        0,
+        1,
+        tmp
     );
 
     serial_write_string(
