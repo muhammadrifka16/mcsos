@@ -2,6 +2,8 @@
  M artifacts/m14/git_status_before_m14.txt
  M kernel/core/kmain.c
 ?? artifacts/m14/gdb_m14_session.txt
+?? artifacts/m14/git_status_after_m14.txt
+?? artifacts/m14/m14_final_sha256.txt
 ?? include/mcsos/block.h
 ?? kernel/block/
 ?? tests/host/
