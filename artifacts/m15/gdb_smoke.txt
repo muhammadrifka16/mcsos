@@ -1,0 +1,4 @@
+mcsfs1_format  BP1 at 0x20a2c0
+mcsfs1_mount   BP2 at 0x20a8d0
+mcsfs1_fsck    BP3 at 0x20bd20
+Breakpoint 1 hit: 0x000000000020a2c0 in mcsfs1_format()
