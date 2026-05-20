@@ -30,7 +30,8 @@ CFLAGS := \
 -Ikernel/arch/x86_64/include \
 -Ikernel/include \
 -Iinclude \
--Iinclude/mcsos/user
+-Iinclude/mcsos/user \
+-Ifs/mcsfs1
 
 ASFLAGS := \
 --target=x86_64-unknown-none-elf \
@@ -81,6 +82,7 @@ kernel/sync/lockdep.c \
 kernel/sync/spinlock.c \
 kernel/sync/mutex.c \
 kernel/sync/selftest.c \
+fs/mcsfs1/mcsfs1.c
 
 SRCS_S := \
 kernel/arch/x86_64/isr.S \
@@ -121,6 +123,7 @@ $(BUILD_DIR)/normal/kernel/sync/lockdep.o \
 $(BUILD_DIR)/normal/kernel/sync/spinlock.o \
 $(BUILD_DIR)/normal/kernel/sync/mutex.o \
 $(BUILD_DIR)/normal/kernel/sync/selftest.o \
+$(BUILD_DIR)/normal/fs/mcsfs1/mcsfs1.o
 
 all: $(BUILD_DIR)/kernel.elf
 
@@ -247,6 +250,10 @@ $(BUILD_DIR)/normal/kernel/sync/mutex.o: kernel/sync/mutex.c
 
 $(BUILD_DIR)/normal/kernel/sync/selftest.o: kernel/sync/selftest.c
 >mkdir -p $(BUILD_DIR)/normal/kernel/sync/
+>$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/normal/fs/mcsfs1/mcsfs1.o: fs/mcsfs1/mcsfs1.c fs/mcsfs1/mcsfs1.h
+>mkdir -p $(BUILD_DIR)/normal/fs/mcsfs1/
 >$(CC) $(CFLAGS) -c $< -o $@
 
 $(BUILD_DIR)/kernel.elf: $(OBJS)
@@ -418,7 +425,7 @@ CFLAGS_HOST_M11 := \
 -Werror \
 -O2 \
 -g \
--Iinclude/mcsos/user
+-Iinclude/mcsos/user \
 
 CFLAGS_KERNEL_M11 := \
 --target=x86_64-unknown-none-elf \
@@ -438,7 +445,7 @@ CFLAGS_KERNEL_M11 := \
 -m64 \
 -march=x86-64 \
 -mabi=sysv \
--Iinclude/mcsos/user
+-Iinclude/mcsos/user \
 
 .PHONY: m11-all m11-host-test m11-freestanding m11-audit m11-clean
 

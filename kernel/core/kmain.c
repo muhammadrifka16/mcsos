@@ -5,6 +5,7 @@
 #include "pit.h"
 #include "vmm.h"
 #include "mcs_sync.h"
+#include "mcsfs1.h"
 
 #include <stdint.h>
 
@@ -310,6 +311,20 @@ static void m10_syscall_smoke_direct(void) {
     }
     serial_write_string("[M10] syscall smoke done\n");
 }
+static uint8_t m15_smoke_disk[128][512];
+static int m15_smoke_read(void *ctx, uint32_t lba, void *buf) {
+    (void)ctx;
+    if (lba >= 128u) return -1;
+    __builtin_memcpy(buf, m15_smoke_disk[lba], 512);
+    return 0;
+}
+static int m15_smoke_write(void *ctx, uint32_t lba, const void *buf) {
+    (void)ctx;
+    if (lba >= 128u) return -1;
+    __builtin_memcpy(m15_smoke_disk[lba], buf, 512);
+    return 0;
+}
+static int m15_smoke_flush(void *ctx) { (void)ctx; return 0; }
 void kmain(void)
 {
     cpu_cli();
@@ -587,7 +602,34 @@ void kmain(void)
         1,
         tmp
     );
-
+/* M15 MCSFS1 smoke test */
+    {
+        static struct mcsfs1_blkdev fs_dev;
+        static struct mcsfs1_mount  fs_mnt;
+        fs_dev.ctx = 0;
+        fs_dev.block_count = 128u;
+        fs_dev.read  = m15_smoke_read;
+        fs_dev.write = m15_smoke_write;
+        fs_dev.flush = m15_smoke_flush;
+        int rc;
+        rc = mcsfs1_format(&fs_dev);
+        serial_write_string(rc == 0 ? "[M15] format: OK\n"  : "[M15] format: FAIL\n");
+        rc = mcsfs1_mount(&fs_mnt, &fs_dev);
+        serial_write_string(rc == 0 ? "[M15] mount: OK\n"   : "[M15] mount: FAIL\n");
+        rc = mcsfs1_fsck(&fs_dev);
+        serial_write_string(rc == 0 ? "[M15] fsck: OK\n"    : "[M15] fsck: FAIL\n");
+        rc = mcsfs1_create(&fs_mnt, "smoke.txt");
+        serial_write_string(rc == 0 ? "[M15] create: OK\n"  : "[M15] create: FAIL\n");
+        const uint8_t pay[] = "MCSOS M15 smoke";
+        rc = mcsfs1_write(&fs_mnt, "smoke.txt", pay, (uint32_t)sizeof(pay)-1u);
+        serial_write_string(rc == 0 ? "[M15] write: OK\n"   : "[M15] write: FAIL\n");
+        uint8_t rbuf[64]; uint32_t rlen = 0u;
+        rc = mcsfs1_read(&fs_mnt, "smoke.txt", rbuf, sizeof(rbuf), &rlen);
+        serial_write_string(rc == 0 ? "[M15] read: OK\n"    : "[M15] read: FAIL\n");
+        rc = mcsfs1_unlink(&fs_mnt, "smoke.txt");
+        serial_write_string(rc == 0 ? "[M15] unlink: OK\n"  : "[M15] unlink: FAIL\n");
+        serial_write_string("[M15] smoke test selesai\n");
+    }
     serial_write_string(
         "[MCSOS:M5] sti: enabling interrupts\n"
     );
