@@ -68,13 +68,13 @@ fi
 make clean >/dev/null 2>&1 || true
 make check
 
-if nm -u build/vmm.o | grep -v '^$'; then
-  echo "[FAIL] build/vmm.o memiliki unresolved symbol" >&2
+if nm -u build/normal/src/vmm.o | grep -v '^$'; then
+  echo "[FAIL] build/normal/src/vmm.o memiliki unresolved symbol" >&2
   exit 1
 fi
 
-objdump -dr build/vmm.o > build/vmm.objdump.txt
-grep -q "invlpg" build/vmm.objdump.txt || { echo "[FAIL] invlpg tidak terlihat pada disassembly" >&2; exit 1; }
-grep -q "cr3" build/vmm.objdump.txt || { echo "[FAIL] akses CR3 tidak terlihat pada disassembly" >&2; exit 1; }
+objdump -dr build/normal/src/vmm.o > build/normal/src/vmm.objdump.txt
+grep -q "invlpg" build/normal/src/vmm.objdump.txt || { echo "[FAIL] invlpg tidak terlihat pada disassembly" >&2; exit 1; }
+grep -q "cr3" build/normal/src/vmm.objdump.txt || { echo "[FAIL] akses CR3 tidak terlihat pada disassembly" >&2; exit 1; }
 
 echo "[PASS] M7 preflight selesai. Lanjutkan integrasi QEMU hanya setelah laporan M0-M6 lengkap."
