@@ -41,6 +41,7 @@ __attribute__((aligned(4096)));
  * ========================= */
 
  mcsos_scheduler_t g_sched;
+static void mcsos_boot_sched_bind(void) { mcsos_sched_set_active(&g_sched); }
 
 static mcsos_thread_t g_boot_thread;
 static mcsos_thread_t g_thread_a;
@@ -442,6 +443,8 @@ void kmain(void)
         &g_sched,
         &g_boot_thread
     );
+
+    mcsos_boot_sched_bind();
 
     mcsos_thread_prepare(
         &g_thread_a,

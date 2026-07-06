@@ -1,9 +1,12 @@
 #include "mcsos_thread.h"
-#include "mcs_vfs.h"
 
 #if !defined(MCSOS_HOST_TEST)
-/* g_sched didefinisikan di kmain.c */
-extern mcsos_scheduler_t g_sched;
+static mcsos_scheduler_t *g_active_sched = (mcsos_scheduler_t *)0;
+
+void mcsos_sched_set_active(mcsos_scheduler_t *sched)
+{
+    g_active_sched = sched;
+}
 #endif
 
 /* ------------------------------------------------------------------ */
@@ -52,7 +55,7 @@ void mcsos_thread_trampoline(void)
 #else
 
     mcsos_thread_t *thread =
-        g_sched.current;
+        g_active_sched->current;
 
     if (thread == (mcsos_thread_t *)0) {
 
@@ -241,11 +244,6 @@ int mcsos_thread_prepare(
     thread->switches = 0;
     thread->ticks = 0;
     thread->exit_code = 0;
-    mcs_fd_table_init(
-        &thread->fd_table
-
-    );
-
     return MCSOS_SCHED_OK;
 }
 
