@@ -43,7 +43,7 @@ Setiap milestone di bawah sudah **diverifikasi jalan langsung** di lingkungan pe
 | **M7** | Virtual Memory Manager | Page table 4-level x86_64, page fault diagnostics | `bash scripts/m7_preflight.sh` → `[PASS] M7 preflight selesai` |
 | **M8** | Kernel Heap | First-fit free-list allocator dinamis | `make m8-all` |
 | **M9** | Kernel Thread & Scheduler | Runqueue round-robin kooperatif, context switch x86_64 | `make m9-all` |
-| **M10** | Syscall ABI Awal | Dispatcher syscall, validasi argumen, entry `int 0x80` | Lihat `logs/m10_preflight_qemu.log`, `logs/m10_serial.log` |
+| **M10** | Syscall ABI Awal | Dispatcher syscall, validasi argumen, entry `int 0x80` | Lihat `docs/LAPORAN SISTEM OPERASI/laporan_praktikum_M10_MUHAMMAD RIFKA Z_25832072009.md` (audit `nm`/`readelf`/`objdump` lengkap), `logs/m10_preflight_qemu.log`, `logs/m10_serial.log` |
 | **M11** | ELF64 User Loader | Parser ELF64, process image plan | `make m11-all` |
 | **M12** | Sinkronisasi Kernel | Spinlock, mutex kooperatif, lock-order validator | Lihat `evidence/M12/*` (build log, qemu log, audit lengkap) |
 | **M13** | VFS Minimal & RAMFS | VFS, file descriptor table, RAMFS in-memory, syscall file I/O | Compile manual: `tests/m13_vfs_host_test.c` + `kernel/vfs/*.c` |
@@ -58,6 +58,7 @@ Setiap milestone di bawah sudah **diverifikasi jalan langsung** di lingkungan pe
 - **`make meta`** bukan target Makefile. Metadata toolchain dikumpulkan lewat script terpisah: `bash tools/scripts/collect_meta.sh`, hasil di `build/meta/host-readiness.txt` dan `build/meta/toolchain-versions.txt`.
 - Dua script sempat ditemukan out-of-sync dengan Makefile terbaru dan sudah diperbaiki: `scripts/check_m5_static.sh` (target `make grade` → `make check`) dan `scripts/m7_preflight.sh` (path `build/vmm.o` → `build/normal/src/vmm.o`).
 - **M9 sempat melanggar scope resmi**: `mcsos_thread.c` sebelumnya extern-reference langsung ke `g_sched` (didefinisikan di `kmain.c`) dan menginisialisasi `fd_table` (fitur M13) di dalam `mcsos_thread_prepare()`, menyebabkan `nm -u` pada `m9_scheduler_combined.o` tidak kosong — melanggar kriteria wajib panduan M9. Sudah diperbaiki di commit `8a1f14b`: `fd_table` dihapus dari `mcsos_thread_t` (dead code, tidak pernah dibaca), dan `g_sched` di-encapsulate jadi `g_active_sched` file-local di `mcsos_thread.c` dengan setter `mcsos_sched_set_active()` yang dipanggil sekali dari `kmain.c`. `nm -u` sekarang kosong; full kernel relink diverifikasi ulang lewat `check_m5_static.sh` tanpa regresi.
+- **M10 diverifikasi ulang manual**: repo tidak memiliki target `make m10-*` (Makefile utama hanya punya `m8/m9/m11/m14/m15`), tetapi panduan M10 mengizinkan validasi manual sebagai fallback. Reproduksi manual (`nm -u` object gabungan `syscall.o` + `syscall_entry.o`, `readelf -h`, `objdump -dr`) mengonfirmasi seluruh kriteria wajib: `nm -u` kosong, ELF64 x86_64, `x86_64_syscall_int80_stub` dan `iretq` ada pada disassembly. Detail lengkap ada di laporan M10.
 
 ## Build & Run (kernel utama)
 
