@@ -1,0 +1,123 @@
+#!/usr/bin/env bash
+# MCSOS Demo M0-M16 — corrected milestone mapping, colorized, animated
+set +e
+
+RESET='\033[0m'; BOLD='\033[1m'; DIM='\033[2m'
+RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[0;33m'
+BLUE='\033[0;34m'; MAGENTA='\033[0;35m'; CYAN='\033[0;36m'
+
+TOTAL_STEPS=17
+STEP_COUNT=0
+
+typewriter() {
+  local text="$1" delay="${2:-0.008}"
+  for (( i=0; i<${#text}; i++ )); do
+    printf '%s' "${text:$i:1}"
+    sleep "$delay"
+  done
+  printf '\n'
+}
+
+progress_bar() {
+  local current=$1 total=$2 width=40
+  local filled=$(( current * width / total ))
+  local empty=$(( width - filled ))
+  printf "${BLUE}["
+  for ((j=0;j<filled;j++)); do printf '█'; done
+  for ((j=0;j<empty;j++)); do printf '░'; done
+  printf "] %d/%d${RESET}\n\n" "$current" "$total"
+}
+
+section() {
+  local num="$1" title="$2"
+  STEP_COUNT=$((STEP_COUNT+1))
+  echo
+  echo -e "${BOLD}${MAGENTA}╔══════════════════════════════════════════════════════════╗${RESET}"
+  printf "${BOLD}${MAGENTA}║${RESET}  ${BOLD}${CYAN}%-58s${RESET}${BOLD}${MAGENTA}║${RESET}\n" "[$num] $title"
+  echo -e "${BOLD}${MAGENTA}╚══════════════════════════════════════════════════════════╝${RESET}"
+  progress_bar "$STEP_COUNT" "$TOTAL_STEPS"
+  sleep 0.3
+}
+
+run_step() {
+  local desc="$1"; shift
+  echo -e "${YELLOW}▶ ${desc}${RESET}"
+  ( "$@" ) > /tmp/mcsos_demo_step.log 2>&1 &
+  local pid=$!
+  local spin='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
+  local i=0
+  while kill -0 "$pid" 2>/dev/null; do
+    i=$(( (i+1) % ${#spin} ))
+    printf '\r%s%s%s %s   ' "$CYAN" "${spin:$i:1}" "$RESET" "$desc"
+    sleep 0.08
+  done
+  wait "$pid"; local status=$?
+  if [ $status -eq 0 ]; then
+    printf '\r%b✔ %s — PASS%b\n' "$GREEN" "$desc" "$RESET"
+  else
+    printf '\r%b✘ %s — FAIL (exit %d)%b\n' "$RED" "$desc" "$status" "$RESET"
+    echo -e "${DIM}--- log tail ---${RESET}"
+    tail -n 15 /tmp/mcsos_demo_step.log
+  fi
+  sleep 0.2
+  return $status
+}
+
+step_m0() { find docs -maxdepth 2 -type f | sort; cat docs/reports/M0-laporan.md 2>/dev/null | head -n 20; }
+step_m1() { bash tools/scripts/check_toolchain.sh; }
+step_m2() { bash tools/scripts/m2_preflight.sh; }
+step_m3() { bash tools/scripts/m3_preflight.sh; }
+step_m4() { bash tools/scripts/m4_preflight.sh; }
+step_m5() { bash scripts/check_m5_static.sh; }
+step_m6() { bash scripts/check_m6_static.sh; }
+step_m7() { bash scripts/m7_preflight.sh; }
+step_m8() { make m8-all; }
+step_m9() { make m9-all; }
+step_m10() { grep -n "syscall_dispatch\|SYS_" kernel/syscall/syscall.c | head -n 20; cat logs/m10_serial.log 2>/dev/null; }
+step_m11() { make m11-all; }
+step_m12() { ls -la evidence/M12; cat evidence/M12/qemu-selftest.log 2>/dev/null | tail -n 20; }
+step_m13() {
+  mkdir -p build/m13
+  clang -std=c17 -Wall -Wextra -Werror -Iinclude -Ikernel/include -Ikernel/arch/x86_64/include -Ifs/mcsfs1 \
+    tests/m13_vfs_host_test.c kernel/vfs/ramfs.c kernel/vfs/fd.c kernel/vfs/sys_vfs.c \
+    -o build/m13/m13_vfs_host_test
+  ./build/m13/m13_vfs_host_test
+}
+step_m14() { make m14-all; }
+step_m15() { make m15-all; }
+step_m16() { bash scripts/m16_preflight.sh && make -C tests/m16 clean all; }
+
+clear
+echo -e "${BOLD}${CYAN}"
+typewriter "  ███╗   ███╗ ██████╗███████╗ ██████╗ ███████╗" 0.001
+typewriter "  ████╗ ████║██╔════╝██╔════╝██╔═══██╗██╔════╝" 0.001
+typewriter "  ██╔████╔██║██║     ███████╗██║   ██║███████╗" 0.001
+typewriter "  ██║╚██╔╝██║██║     ╚════██║██║   ██║╚════██║" 0.001
+typewriter "  ██║ ╚═╝ ██║╚██████╗███████║╚██████╔╝███████║" 0.001
+typewriter "  ╚═╝     ╚═╝ ╚═════╝╚══════╝ ╚═════╝ ╚══════╝" 0.001
+echo -e "${RESET}"
+typewriter "        MCSOS COMPLETE DEMO — M0 through M16" 0.01
+sleep 0.5
+
+section "M0" "BASELINE & GOVERNANCE";           run_step "M0 baseline docs review" step_m0
+section "M1" "TOOLCHAIN REPRODUCIBLE";          run_step "M1 toolchain check" step_m1
+section "M2" "BOOT IMAGE & KERNEL ELF64";       run_step "M2 preflight" step_m2
+section "M3" "PANIC PATH & DEBUG WORKFLOW";     run_step "M3 preflight" step_m3
+section "M4" "IDT & EXCEPTION HANDLING";        run_step "M4 preflight" step_m4
+section "M5" "EXTERNAL INTERRUPT & TIMER";      run_step "M5 static check" step_m5
+section "M6" "PHYSICAL MEMORY MANAGER";         run_step "M6 static check" step_m6
+section "M7" "VIRTUAL MEMORY MANAGER";          run_step "M7 preflight" step_m7
+section "M8" "KERNEL HEAP";                     run_step "M8 make all" step_m8
+section "M9" "KERNEL THREAD & SCHEDULER";       run_step "M9 make all" step_m9
+section "M10" "SYSCALL ABI AWAL";               run_step "M10 syscall review" step_m10
+section "M11" "ELF64 USER LOADER";              run_step "M11 make all" step_m11
+section "M12" "SINKRONISASI KERNEL";            run_step "M12 evidence review" step_m12
+section "M13" "VFS MINIMAL & RAMFS";            run_step "M13 host test" step_m13
+section "M14" "BLOCK DEVICE LAYER";             run_step "M14 make all" step_m14
+section "M15" "FILESYSTEM PERSISTENT (MCSFS1)"; run_step "M15 make all" step_m15
+section "M16" "CRASH CONSISTENCY (MCSFS1J)";    run_step "M16 preflight + host test" step_m16
+
+echo
+echo -e "${BOLD}${GREEN}=========================================================="
+echo -e "             MCSOS M0-M16 DEMO COMPLETE"
+echo -e "==========================================================${RESET}"

@@ -68,10 +68,10 @@ if [ -f build/meta/toolchain-versions.txt ]; then
 else
     log "WARN: build/meta/toolchain-versions.txt belum ada; mencoba make meta"
 
-    if make -n meta >/dev/null 2>&1; then
-        make meta
+    if [ -x tools/scripts/check_toolchain.sh ]; then
+        bash tools/scripts/check_toolchain.sh
     else
-        fail "target make meta tidak tersedia dan metadata M1 belum ada"
+        fail "check_toolchain.sh tidak ditemukan dan metadata M1 belum ada"
     fi
 fi
 

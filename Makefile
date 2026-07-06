@@ -376,6 +376,8 @@ m9-host-test: | $(M9_BUILD_DIR)
 >$(CC) $(CFLAGS_HOST_M9) \
 >tests/test_scheduler.c \
 >kernel/mcsos_thread.c \
+>kernel/vfs/fd.c \
+>kernel/vfs/ramfs.c \
 >-o $(M9_BUILD_DIR)/m9_host_test
 >./$(M9_BUILD_DIR)/m9_host_test | tee $(M9_BUILD_DIR)/test_scheduler.log
 
