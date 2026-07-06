@@ -19,3 +19,4 @@ iso_root/
 gcc-10.3.0/
 
 third_party/limine/
+*.bak*
