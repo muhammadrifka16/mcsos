@@ -299,6 +299,26 @@ distclean: clean
 >rm -rf iso_root limine evidence
 
 # =========================
+# M1 TARGETS (toolchain proof)
+# =========================
+
+PROOF_BUILD_DIR := build/proof
+
+.PHONY: proof proof-clean
+
+proof-clean:
+>$(RM) -r $(PROOF_BUILD_DIR)
+
+$(PROOF_BUILD_DIR):
+>mkdir -p $(PROOF_BUILD_DIR)
+
+proof: | $(PROOF_BUILD_DIR)
+>$(CC) $(CFLAGS) -c tests/toolchain/freestanding_probe.c -o $(PROOF_BUILD_DIR)/freestanding_probe.o
+>$(READELF) -hW $(PROOF_BUILD_DIR)/freestanding_probe.o | tee $(PROOF_BUILD_DIR)/readelf_header.txt
+>@echo "[OK] M1 proof object built: $(PROOF_BUILD_DIR)/freestanding_probe.o"
+
+
+# =========================
 # M8 TARGETS
 # =========================
 
