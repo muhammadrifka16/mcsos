@@ -57,6 +57,7 @@ Setiap milestone di bawah sudah **diverifikasi jalan langsung** di lingkungan pe
 - **`scripts/demo_m0_m16.sh`** — script demo lama, label milestone-nya **tidak sinkron** dengan struktur folder/panduan aktual (mis. section "[M5]" menampilkan `kernel/mm/kmem.c` yang sebenarnya adalah kode M8). Jangan jadikan referensi urutan milestone; gunakan tabel di atas.
 - **`make meta`** bukan target Makefile. Metadata toolchain dikumpulkan lewat script terpisah: `bash tools/scripts/collect_meta.sh`, hasil di `build/meta/host-readiness.txt` dan `build/meta/toolchain-versions.txt`.
 - Dua script sempat ditemukan out-of-sync dengan Makefile terbaru dan sudah diperbaiki: `scripts/check_m5_static.sh` (target `make grade` → `make check`) dan `scripts/m7_preflight.sh` (path `build/vmm.o` → `build/normal/src/vmm.o`).
+- **M9 sempat melanggar scope resmi**: `mcsos_thread.c` sebelumnya extern-reference langsung ke `g_sched` (didefinisikan di `kmain.c`) dan menginisialisasi `fd_table` (fitur M13) di dalam `mcsos_thread_prepare()`, menyebabkan `nm -u` pada `m9_scheduler_combined.o` tidak kosong — melanggar kriteria wajib panduan M9. Sudah diperbaiki di commit `8a1f14b`: `fd_table` dihapus dari `mcsos_thread_t` (dead code, tidak pernah dibaca), dan `g_sched` di-encapsulate jadi `g_active_sched` file-local di `mcsos_thread.c` dengan setter `mcsos_sched_set_active()` yang dipanggil sekali dari `kmain.c`. `nm -u` sekarang kosong; full kernel relink diverifikasi ulang lewat `check_m5_static.sh` tanpa regresi.
 
 ## Build & Run (kernel utama)
 
