@@ -45,8 +45,8 @@ Setiap milestone di bawah sudah **diverifikasi jalan langsung** di lingkungan pe
 | **M9** | Kernel Thread & Scheduler | Runqueue round-robin kooperatif, context switch x86_64 | `make m9-all` |
 | **M10** | Syscall ABI Awal | Dispatcher syscall, validasi argumen, entry `int 0x80` | Lihat `docs/LAPORAN SISTEM OPERASI/laporan_praktikum_M10_MUHAMMAD RIFKA Z_25832072009.md` (audit `nm`/`readelf`/`objdump` lengkap), `logs/m10_preflight_qemu.log`, `logs/m10_serial.log` |
 | **M11** | ELF64 User Loader | Parser ELF64, process image plan | `make m11-all` |
-| **M12** | Sinkronisasi Kernel | Spinlock, mutex kooperatif, lock-order validator | Lihat `evidence/M12/*` (build log, qemu log, audit lengkap) |
-| **M13** | VFS Minimal & RAMFS | VFS, file descriptor table, RAMFS in-memory, syscall file I/O | Compile manual: `tests/m13_vfs_host_test.c` + `kernel/vfs/*.c` |
+| **M12** | Sinkronisasi Kernel | Spinlock, mutex kooperatif, lock-order validator | `make -f Makefile.m12 CC=clang clean all` |
+| **M13** | VFS Minimal & RAMFS | VFS, file descriptor table, RAMFS in-memory, syscall file I/O | `make -f Makefile.m13 m13-all` |
 | **M14** | Block Device Layer | Block device registry, RAM block driver, buffer cache | `make m14-all` |
 | **M15** | Filesystem Persistent (MCSFS1) | Superblock, inode/block bitmap, root directory, fsck-lite | `make m15-all` |
 | **M16** | Crash Consistency (MCSFS1J) | Write-ahead journal, recovery, fault-injection test | `bash scripts/m16_preflight.sh && make -C tests/m16 clean all` |
